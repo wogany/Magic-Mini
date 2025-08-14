@@ -26,15 +26,18 @@ void CWs2812b::Init(void)
 */
 void CWs2812b::Test(void)
 {
-    PIXEL.fill(PIXEL.Color(255, 0, 0), 0, 40); // 红色
+    PIXEL.fill(PIXEL.Color(255, 0, 0), 0, 40);
     PIXEL.show();
     delay(1000);
-    PIXEL.fill(PIXEL.Color(0, 255, 0), 0, 40); // 绿色
+    PIXEL.fill(PIXEL.Color(0, 255, 0), 0, 40);
     PIXEL.show();
     delay(1000);
-    PIXEL.fill(PIXEL.Color(0, 0, 255), 0, 40); // 蓝色
+    PIXEL.fill(PIXEL.Color(0, 0, 255), 0, 40);
     PIXEL.show();
     delay(1000);
-    PIXEL.fill(PIXEL.Color(255, 255, 255), 0, 40); // 白色
+    PIXEL.fill(PIXEL.Color(255, 255, 255), 0, 40);
+    PIXEL.show();
+    delay(1000);
+    PIXEL.clear();
     PIXEL.show();
 }
