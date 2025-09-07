@@ -25,6 +25,7 @@ volatile bool middleButtonPressed = false; // 中间按键按下标志
 volatile bool rightButtonPressed = false;  // 右按键按下标志
 
 uint8_t *colorChoose = nullptr; // 颜色选择指针
+uint8_t middleButtonCount = 0; // 中间按键计数
 
 CWs2812b RGB = CWs2812b(RGB_PIN, RGB_NUM); // 灯板对象
 CNvs NVS;                                  // NVS存储对象
@@ -130,7 +131,7 @@ void buttonLoop(void)
 
         buttonState = digitalRead(buttonPin);
     }
-    
+
     NVS.saveColor(RGB.colorRed, RGB.colorGreen, RGB.colorBlue);
 }
 
@@ -141,10 +142,9 @@ void buttonLoop(void)
 */
 void leftButtonHandle(void)
 {
-    RGB.colorRed++;
-    if (RGB.colorRed > 255)
+    if (*colorChoose > 0)
     {
-        RGB.colorRed = 0;
+        (*colorChoose)--;
     }
 }
 
@@ -155,10 +155,11 @@ void leftButtonHandle(void)
 */
 void middleButtonHandle(void)
 {
-    RGB.colorGreen++;
-    if (RGB.colorGreen > 255)
+    middleButtonCount++;
+
+    if (middleButtonCount > 10)
     {
-        RGB.colorGreen = 0;
+        // 进入配网模式
     }
 }
 
@@ -169,10 +170,9 @@ void middleButtonHandle(void)
 */
 void rightButtonHandle(void)
 {
-    RGB.colorBlue++;
-    if (RGB.colorBlue > 255)
+    if (*colorChoose < 255)
     {
-        RGB.colorBlue = 0;
+        (*colorChoose)++;
     }
 }
 
@@ -212,6 +212,19 @@ void IRAM_ATTR middleButtonISR(void)
         {
             isButtonPressed = true;
             middleButtonPressed = true;
+        }
+
+        if (colorChoose == &RGB.colorRed)
+        {
+            colorChoose = &RGB.colorGreen; // 选择绿色分量
+        }
+        else if (colorChoose == &RGB.colorGreen)
+        {
+            colorChoose = &RGB.colorBlue; // 选择蓝色分量
+        }
+        else if (colorChoose == &RGB.colorBlue)
+        {
+            colorChoose = &RGB.colorRed; // 选择红色分量
         }
     }
 }
