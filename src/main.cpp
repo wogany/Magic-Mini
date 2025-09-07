@@ -8,24 +8,25 @@
 
 #define RGB_PIN 10           // 信号输入引脚
 #define BUTTON_LEFT_PIN 18   // 左按键引脚
-#define BUTTON_MIDDLE_PIN 19 // 中间按键引脚
+#define BUTTON_MIDDLE_PIN 19 // 中按键引脚
 #define BUTTON_RIGHT_PIN 3   // 右按键引脚
 
 #define BUTTON_DEBOUNCE_DELAY 10 // 按键消抖延时
-#define BUTTON_HOLD_DELAY 50     // 按键长按时间
+#define BUTTON_HOLD_DELAY 50     // 按键长按任务单元时间
 
-volatile unsigned long lastTime = 0;             // 上次长按检查时间
+unsigned long lastTime = 0;                      // 按键长按任务上次触发时间
 volatile unsigned long leftButtonLastTime = 0;   // 左按键上次触发时间
-volatile unsigned long middleButtonLastTime = 0; // 中间按键上次触发时间
+volatile unsigned long middleButtonLastTime = 0; // 中按键上次触发时间
 volatile unsigned long rightButtonLastTime = 0;  // 右按键上次触发时间
 
 volatile bool isButtonPressed = false;     // 有按键按下标志
 volatile bool leftButtonPressed = false;   // 左按键按下标志
-volatile bool middleButtonPressed = false; // 中间按键按下标志
+volatile bool middleButtonPressed = false; // 中按键按下标志
 volatile bool rightButtonPressed = false;  // 右按键按下标志
+bool isMiddleButtonHold = false;           // 中按键长按任务标志
 
 uint8_t *colorChoose = nullptr; // 颜色选择指针
-uint8_t middleButtonCount = 0; // 中间按键计数
+uint8_t middleButtonCount = 0;  // 中按键计数
 
 CWs2812b RGB = CWs2812b(RGB_PIN, RGB_NUM); // 灯板对象
 CNvs NVS;                                  // NVS存储对象
@@ -87,7 +88,7 @@ void buttonSetup(void)
 */
 void buttonLoop(void)
 {
-    /* 检测所按按键引脚 */
+    /* 判断被按下的按键 */
     uint8_t buttonPin;
     if (leftButtonPressed)
     {
@@ -102,15 +103,16 @@ void buttonLoop(void)
         buttonPin = BUTTON_RIGHT_PIN;
     }
 
-    /* 检测所按按键状态 */
+    /* 判断被按下按键的状态 */
     bool buttonState = false;
     buttonState = digitalRead(buttonPin);
 
-    /* 处理按键长按任务 */
+    /* 当按键长按时执行 */
     while (buttonState == false)
     {
         unsigned long now = millis();
 
+        /* 每经过一次长按任务单元时间执行*/
         if (now - lastTime > BUTTON_HOLD_DELAY)
         {
             lastTime = now;
@@ -121,6 +123,10 @@ void buttonLoop(void)
             else if (middleButtonPressed)
             {
                 middleButtonHandle();
+                if (isMiddleButtonHold == false)
+                {
+                    break; // 退出长按处理循环
+                }
             }
             else if (rightButtonPressed)
             {
@@ -129,9 +135,10 @@ void buttonLoop(void)
             RGB.setAllPixelColor(RGB.colorRed, RGB.colorGreen, RGB.colorBlue);
         }
 
-        buttonState = digitalRead(buttonPin);
+        buttonState = digitalRead(buttonPin); // 读取按键状态
     }
 
+    /* 按键释放后执行 */
     NVS.saveColor(RGB.colorRed, RGB.colorGreen, RGB.colorBlue);
 }
 
@@ -156,10 +163,11 @@ void leftButtonHandle(void)
 void middleButtonHandle(void)
 {
     middleButtonCount++;
-
-    if (middleButtonCount > 10)
+    if (middleButtonCount > (10000 / BUTTON_HOLD_DELAY))
     {
         // 进入配网模式
+        middleButtonCount = 0;
+        isMiddleButtonHold = false;
     }
 }
 
@@ -212,6 +220,7 @@ void IRAM_ATTR middleButtonISR(void)
         {
             isButtonPressed = true;
             middleButtonPressed = true;
+            isMiddleButtonHold = true;
         }
 
         if (colorChoose == &RGB.colorRed)
