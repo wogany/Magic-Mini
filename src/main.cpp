@@ -24,6 +24,8 @@ volatile bool leftButtonPressed = false;   // 左按键按下标志
 volatile bool middleButtonPressed = false; // 中间按键按下标志
 volatile bool rightButtonPressed = false;  // 右按键按下标志
 
+uint8_t *colorChoose = nullptr; // 颜色选择指针
+
 CWs2812b RGB = CWs2812b(RGB_PIN, RGB_NUM); // 灯板对象
 CNvs NVS;                                  // NVS存储对象
 
@@ -73,6 +75,8 @@ void buttonSetup(void)
     attachInterrupt(BUTTON_LEFT_PIN, leftButtonISR, FALLING);
     attachInterrupt(BUTTON_MIDDLE_PIN, middleButtonISR, FALLING);
     attachInterrupt(BUTTON_RIGHT_PIN, rightButtonISR, FALLING);
+
+    colorChoose = &RGB.colorRed; // 默认选择红色分量
 }
 
 /*
@@ -122,11 +126,12 @@ void buttonLoop(void)
                 rightButtonHandle();
             }
             RGB.setAllPixelColor(RGB.colorRed, RGB.colorGreen, RGB.colorBlue);
-            NVS.saveColor(RGB.colorRed, RGB.colorGreen, RGB.colorBlue);
         }
 
         buttonState = digitalRead(buttonPin);
     }
+    
+    NVS.saveColor(RGB.colorRed, RGB.colorGreen, RGB.colorBlue);
 }
 
 /*
