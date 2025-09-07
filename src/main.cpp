@@ -1,5 +1,6 @@
 #include <Arduino.h>
-#include <ws2812b.h>
+#include "ws2812b.h"
+#include "nvs.h"
 
 #define RGB_NUM 40 // 灯珠数量
 #define RGB_ROW 5  // 灯板行数
@@ -23,11 +24,14 @@ volatile bool leftButtonPressed = false;   // 左按键按下标志
 volatile bool middleButtonPressed = false; // 中间按键按下标志
 volatile bool rightButtonPressed = false;  // 右按键按下标志
 
-/* 创建一个灯板对象 */
-CWs2812b RGB = CWs2812b(RGB_PIN, RGB_NUM);
+CWs2812b RGB = CWs2812b(RGB_PIN, RGB_NUM); // 灯板对象
+CNvs NVS;                                  // NVS存储对象
 
 void buttonSetup(void);
 void buttonLoop(void);
+void leftButtonHandle(void);
+void middleButtonHandle(void);
+void rightButtonHandle(void);
 void IRAM_ATTR leftButtonISR(void);
 void IRAM_ATTR middleButtonISR(void);
 void IRAM_ATTR rightButtonISR(void);
@@ -35,9 +39,12 @@ void IRAM_ATTR rightButtonISR(void);
 void setup()
 {
     buttonSetup();
+    NVS.init();
+    delay(100);
     RGB.init(RGB_ROW, RGB_COL, Snakelike);
-    delay(1000);
-    RGB.test();
+    delay(100);
+    RGB.begin();
+    delay(100);
 }
 
 void loop()
@@ -75,10 +82,8 @@ void buttonSetup(void)
 */
 void buttonLoop(void)
 {
+    /* 检测所按按键引脚 */
     uint8_t buttonPin;
-    bool buttonState = false;
-
-    /* 获取按键引脚 */
     if (leftButtonPressed)
     {
         buttonPin = BUTTON_LEFT_PIN;
@@ -92,46 +97,77 @@ void buttonLoop(void)
         buttonPin = BUTTON_RIGHT_PIN;
     }
 
-    /* 获取按键状态 */
+    /* 检测所按按键状态 */
+    bool buttonState = false;
     buttonState = digitalRead(buttonPin);
 
-    /* 检测按键长按 */
+    /* 处理按键长按任务 */
     while (buttonState == false)
     {
         unsigned long now = millis();
 
-        /* 检测按键长按超过100ms */
         if (now - lastTime > BUTTON_HOLD_DELAY)
         {
             lastTime = now;
             if (leftButtonPressed)
             {
-                RGB.colorRed++;
-                if (RGB.colorRed > 255)
-                {
-                    RGB.colorRed = 0;
-                }
+                leftButtonHandle();
             }
             else if (middleButtonPressed)
             {
-                RGB.colorGreen++;
-                if (RGB.colorGreen > 255)
-                {
-                    RGB.colorGreen = 0;
-                }
+                middleButtonHandle();
             }
             else if (rightButtonPressed)
             {
-                RGB.colorBlue++;
-                if (RGB.colorBlue > 255)
-                {
-                    RGB.colorBlue = 0;
-                }
+                rightButtonHandle();
             }
             RGB.setAllPixelColor(RGB.colorRed, RGB.colorGreen, RGB.colorBlue);
+            NVS.saveColor(RGB.colorRed, RGB.colorGreen, RGB.colorBlue);
         }
 
         buttonState = digitalRead(buttonPin);
+    }
+}
+
+/*
+    @brief  左按键处理函数
+    @param  无
+    @return 无
+*/
+void leftButtonHandle(void)
+{
+    RGB.colorRed++;
+    if (RGB.colorRed > 255)
+    {
+        RGB.colorRed = 0;
+    }
+}
+
+/*
+    @brief  中按键处理函数
+    @param  无
+    @return 无
+*/
+void middleButtonHandle(void)
+{
+    RGB.colorGreen++;
+    if (RGB.colorGreen > 255)
+    {
+        RGB.colorGreen = 0;
+    }
+}
+
+/*
+    @brief  右按键处理函数
+    @param  无
+    @return 无
+*/
+void rightButtonHandle(void)
+{
+    RGB.colorBlue++;
+    if (RGB.colorBlue > 255)
+    {
+        RGB.colorBlue = 0;
     }
 }
 
@@ -147,7 +183,7 @@ void IRAM_ATTR leftButtonISR(void)
     {
         leftButtonLastTime = now;
 
-        if (!isButtonPressed)
+        if (!isButtonPressed && digitalRead(BUTTON_LEFT_PIN) == LOW)
         {
             isButtonPressed = true;
             leftButtonPressed = true;
@@ -156,7 +192,7 @@ void IRAM_ATTR leftButtonISR(void)
 }
 
 /*
-    @brief  中间按键中断服务函数
+    @brief  中按键中断服务函数
     @param  无
     @return 无
 */
@@ -167,7 +203,7 @@ void IRAM_ATTR middleButtonISR(void)
     {
         middleButtonLastTime = now;
 
-        if (!isButtonPressed)
+        if (!isButtonPressed && digitalRead(BUTTON_MIDDLE_PIN) == LOW)
         {
             isButtonPressed = true;
             middleButtonPressed = true;
@@ -187,7 +223,7 @@ void IRAM_ATTR rightButtonISR(void)
     {
         rightButtonLastTime = now;
 
-        if (!isButtonPressed)
+        if (!isButtonPressed && digitalRead(BUTTON_RIGHT_PIN) == LOW)
         {
             isButtonPressed = true;
             rightButtonPressed = true;

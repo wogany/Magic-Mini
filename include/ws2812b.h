@@ -28,10 +28,11 @@ private:
 
 public:
     CWs2812b(uint8_t pin, uint16_t num);
-    ~CWs2812b();
+    ~CWs2812b(void);
 
     bool init(uint8_t row, uint8_t col, RgbConfig config);
-    void test();
+    void begin(void);
+    void test(void);
     void setAllPixelColor(uint8_t r, uint8_t g, uint8_t b);
 
     uint8_t colorRed;   // ºìÉ«·ÖÁ¿

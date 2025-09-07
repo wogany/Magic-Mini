@@ -1,4 +1,7 @@
 #include "ws2812b.h"
+#include "nvs.h"
+
+extern CNvs NVS; // 外部NVS对象
 
 /*
     @brief  构造函数，初始化数据引脚和灯珠数量
@@ -19,7 +22,7 @@ CWs2812b::CWs2812b(uint8_t pin, uint16_t num) : m_Pin(pin), m_Num(num), PIXEL(nu
     @param  无
     @return 无
 */
-CWs2812b::~CWs2812b()
+CWs2812b::~CWs2812b(void)
 {
 }
 
@@ -79,11 +82,23 @@ bool CWs2812b::init(uint8_t row, uint8_t col, RgbConfig config)
 }
 
 /*
+    @brief  以上一次颜色开启灯板
+    @param  无
+    @return 无
+*/
+void CWs2812b::begin(void)
+{
+    NVS.loadColor(colorRed, colorGreen, colorBlue); // 从NVS加载颜色
+    PIXEL.fill(PIXEL.Color(colorRed, colorGreen, colorBlue)); // 设置所有灯珠颜色
+    PIXEL.show();
+}
+
+/*
     @brief  测试函数，依次点亮每个灯珠
     @param  无
     @return 无
 */
-void CWs2812b::test()
+void CWs2812b::test(void)
 {
     for (uint16_t i = 0; i < m_Num; i++)
     {
