@@ -205,6 +205,7 @@ void middleButtonHandle(void)
         isMiddleButtonHold = false;
 
         /* 进入配网模式 */
+        RGB.setAllPixelColor(0, 0, 0);
         NVS.saveWifiState(false);
         delay(1000);
         ESP.restart();

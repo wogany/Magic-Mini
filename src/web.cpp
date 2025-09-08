@@ -1,54 +1,70 @@
 #include "web.h"
 #include "nvs.h"
+#include "ws2812b.h"
 
-extern CNvs NVS; // 外部NVS存储对象
+extern CNvs NVS;     // 外部NVS存储对象
+extern CWs2812b RGB; // 外部WS2812B对象
 
 const char CWeb::m_ssidAp[] = "Magic-Mini";
 const char CWeb::m_passwordAp[] = "12345678";
 
 const char *pageWifiConfig = "<!DOCTYPE html>"
-                             "<html><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'>"
+                             "<html><head><meta charset='gbk'><meta name='viewport' content='width=device-width,initial-scale=1'>"
                              "<title>Magic-Mini 配网</title>"
                              "<style>"
-                             "body{font-family:Arial,Helvetica,sans-serif;margin:0;padding:0;}"
-                             ".container{display:flex;flex-direction:column;align-items:center;margin-top:60px;padding:0 20px;}"
-                             "h1{font-size:28px;margin:0 0 20px 0;text-align:center;}"
-                             "label{font-size:16px;margin-top:12px;margin-bottom:6px;}"
-                             "input[type=text],input[type=password]{width:100%;max-width:320px;padding:10px;font-size:16px;border:1px solid #ccc;border-radius:4px;box-sizing:border-box;}"
-                             "button{margin-top:18px;padding:10px 24px;font-size:16px;border:none;border-radius:4px;background:#007bff;color:#fff;cursor:pointer;}"
-                             "button:active{transform:translateY(1px);}"
+                             "html,body{height:100%;margin:0;} "
+                             "body{font-family:Arial,Helvetica,sans-serif;background:#fff;display:flex;justify-content:center;align-items:flex-start;} "
+                             ".wrap{width:100%;max-width:420px;display:flex;flex-direction:column;align-items:center;box-sizing:border-box;padding-top:60px;padding-left:16px;padding-right:16px;} "
+                             "h1{font-size:34px;margin:0 0 18px 0;text-align:center;color:#222;} "
+                             ".label{width:100%;max-width:360px;align-self:center;font-size:16px;color:#333;margin:8px 0 6px 0;padding-left:6px;} "
+                             "form{width:100%;max-width:360px;display:flex;flex-direction:column;align-items:center;} "
+                             "input[type=text],input[type=password]{width:100%;padding:12px;font-size:16px;border:1px solid #ccc;border-radius:6px;box-sizing:border-box;} "
+                             "button{margin-top:20px;padding:12px 28px;font-size:18px;border:none;border-radius:6px;background:#007bff;color:#fff;cursor:pointer;} "
                              "</style></head><body>"
-                             "<div class='container'>"
-                             "<h1>Magic-Mini配网</h1>"
-                             "<label>WiFi名称</label>"
-                             "<input type='text' name='ssid' id='ssid' placeholder='输入 WiFi 名称'/>"
-                             "<label>WiFi密码</label>"
-                             "<input type='password' name='password' id='password' placeholder='输入 WiFi 密码'/>"
-                             "<button onclick='doSubmit()'>确认</button>"
+                             "<div class='wrap'>"
+                             "<h1>Magic-Mini</h1>"
+                             "<form action='/connect' method='POST'>"
+                             "<div class='label'>WiFi名称</div>"
+                             "<input type='text' name='ssid' placeholder='输入 WiFi 名称'/>"
+                             "<div class='label'>WiFi密码</div>"
+                             "<input type='password' name='password' placeholder='输入 WiFi 密码'/>"
+                             "<button type='submit'>确认</button>"
+                             "</form>"
                              "</div>"
-                             "<script>"
-                             "function doSubmit(){"
-                             "  var s=document.getElementById('ssid').value;"
-                             "  var p=document.getElementById('password').value;"
-                             "  var xhr=new XMLHttpRequest();"
-                             "  xhr.open('POST','/connect',true);"
-                             "  xhr.setRequestHeader('Content-Type','application/x-www-form-urlencoded');"
-                             "  xhr.onreadystatechange=function(){ if(xhr.readyState==4){ /* 可根据返回处理 */ } };"
-                             "  xhr.send('ssid='+encodeURIComponent(s)+'&password='+encodeURIComponent(p));"
-                             "}"
-                             "</script>"
                              "</body></html>";
 
-const char *pageConfigSuccess = "<!DOCTYPE html><html><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'>"
+const char *pageConfigSuccess = "<!DOCTYPE html><html><head><meta charset='gbk'><meta name='viewport' content='width=device-width,initial-scale=1'>"
                                 "<title>配网成功</title>"
-                                "<style>body{margin:0;height:100vh;display:flex;align-items:center;justify-content:center;font-family:Arial,Helvetica,sans-serif}h1{font-size:24px}</style>"
-                                "</head><body><div><h1>配网成功，正在重启</h1></div></body></html>";
+                                "<style>"
+                                "html,body{height:100%;margin:0;} "
+                                "body{font-family:\"Microsoft YaHei\",Arial,Helvetica,sans-serif;display:flex;justify-content:center;align-items:flex-start;background:#fff;} "
+                                ".container{display:flex;flex-direction:column;align-items:center;padding-top:80px;box-sizing:border-box;} "
+                                "h1{font-size:36px;color:#4CAF50;margin:0 0 12px 0;} "
+                                "p{font-size:20px;color:#333;margin:0;} "
+                                "</style>"
+                                "</head><body><div class='container'><h1>配网成功</h1><p>5秒后自动重启……</p></div></body></html>";
 
-const char *pageConfigFail = "<!DOCTYPE html><html><head><meta charset='utf-8'>"
-                             "<meta http-equiv='refresh' content='5; URL=/'/>"
+const char *pageConfigFail = "<!DOCTYPE html><html><head><meta charset='gbk'>"
+                             "<meta http-equiv='refresh' content='3; URL=/'/>"
+                             "<meta name='viewport' content='width=device-width,initial-scale=1'>"
                              "<title>配网失败</title>"
-                             "<style>body{margin:0;height:100vh;display:flex;align-items:center;justify-content:center;font-family:Arial,Helvetica,sans-serif}h1{font-size:24px}</style>"
-                             "</head><body><div><h1>配网失败，请重新配网</h1></div></body></html>";
+                             "<style>"
+                             "html,body{height:100%;margin:0;} "
+                             "body{font-family:\"Microsoft YaHei\",Arial,Helvetica,sans-serif;display:flex;justify-content:center;align-items:center;background:#fff;} "
+                             ".box{display:flex;flex-direction:column;align-items:center;text-align:center;padding:20px;box-sizing:border-box;} "
+                             "h1{font-size:32px;color:#f44336;margin:0 0 8px 0;} "
+                             "p{font-size:18px;color:#333;margin:0 0 8px 0;} "
+                             ".count{font-size:16px;color:#666;margin-top:8px;}"
+                             "</style>"
+                             "</head><body><div class='box'><h1>配网失败</h1><p>正在返回</p><div class='count' id='count'>3 秒后返回</div></div>"
+                             "<script>"
+                             " (function(){"
+                             "  var t=3; var el=document.getElementById('count');"
+                             "  var iv=setInterval(function(){ t--; if(t<=0){ clearInterval(iv); return; } el.innerText = t + ' 秒后返回'; },1000);"
+                             "  setTimeout(function(){ window.location.href = '/'; }, 3000);"
+                             " })();"
+                             "</script>"
+                             "</body></html>";
 
 /*
     @brief  构造函数
@@ -156,7 +172,7 @@ void CWeb::loop(void)
 */
 void CWeb::m_handleWifiConfig(void)
 {
-    SERVER.send(200, "text/html;charset=utf-8", pageWifiConfig);
+    SERVER.send(200, "text/html; charset=gbk", pageWifiConfig);
 }
 
 /*
@@ -172,7 +188,7 @@ void CWeb::m_handleConnect(void)
     /* 检查是否有SSID */
     if (ssid.length() == 0)
     {
-        SERVER.send(200, "text/html", pageConfigFail);
+        SERVER.send(200, "text/html; charset=gbk", pageConfigFail);
         return;
     }
 
@@ -193,16 +209,16 @@ void CWeb::m_handleConnect(void)
         delay(200);
     }
 
-    /* 连接失败，关闭wifi */
+    /* 连接失败，重新配网 */
     if (WiFi.status() != WL_CONNECTED)
     {
         WiFi.disconnect(true, true);
-        SERVER.send(200, "text/html", pageConfigFail);
+        SERVER.send(200, "text/html; charset=gbk", pageConfigFail);
         return;
     }
 
     /* 连接成功 */
-    SERVER.send(200, "text/html", pageConfigSuccess);
+    SERVER.send(200, "text/html; charset=gbk", pageConfigSuccess);
     if (password.length() > 0)
     {
         NVS.saveWifiInfo(ssid.c_str(), password.c_str(), true);
@@ -212,6 +228,8 @@ void CWeb::m_handleConnect(void)
         NVS.saveWifiInfo(ssid.c_str(), "", false);
     }
     NVS.saveWifiState(true);
-    delay(3000);
+    delay(4000);
+    RGB.setAllPixelColor(0, 0, 0);
+    delay(1000);
     ESP.restart();
 }
