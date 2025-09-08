@@ -3,9 +3,10 @@
 #include "nvs.h"
 #include "web.h"
 
-#define RGB_NUM 40 // 灯珠数量
-#define RGB_ROW 5  // 灯板行数
-#define RGB_COL 8  // 灯板列数
+#define RGB_NUM 40            // 灯珠数量
+#define RGB_ROW 5             // 灯板行数
+#define RGB_COL 8             // 灯板列数
+#define RGB_MAX_BRIGHTNESS 50 // 最大亮度
 
 #define RGB_PIN 10           // 信号输入引脚
 #define BUTTON_LEFT_PIN 18   // 左按键引脚
@@ -20,11 +21,13 @@ volatile unsigned long leftButtonLastTime = 0;   // 左按键上次触发时间
 volatile unsigned long middleButtonLastTime = 0; // 中按键上次触发时间
 volatile unsigned long rightButtonLastTime = 0;  // 右按键上次触发时间
 
-volatile bool isButtonPressed = false;     // 有按键按下标志
-volatile bool leftButtonPressed = false;   // 左按键按下标志
-volatile bool middleButtonPressed = false; // 中按键按下标志
-volatile bool rightButtonPressed = false;  // 右按键按下标志
-bool isMiddleButtonHold = false;           // 中按键长按任务标志
+volatile bool isButtonPressed = false;        // 有按键按下标志
+volatile bool leftButtonPressed = false;      // 左按键按下标志
+volatile bool middleButtonPressed = false;    // 中按键按下标志
+volatile bool rightButtonPressed = false;     // 右按键按下标志
+volatile bool middleButtonShortPress = false; // 中按键短按任务标志
+volatile bool middleButtonRequest = false;    // 中按键短按任务结束标志
+bool isMiddleButtonHold = false;              // 中按键长按任务标志
 
 uint8_t *colorChoose = nullptr; // 颜色选择指针
 uint8_t middleButtonCount = 0;  // 中按键计数
@@ -41,6 +44,7 @@ void rightButtonHandle(void);
 void IRAM_ATTR leftButtonISR(void);
 void IRAM_ATTR middleButtonISR(void);
 void IRAM_ATTR rightButtonISR(void);
+void IRAM_ATTR timerISR(void);
 
 void setup()
 {
@@ -70,6 +74,29 @@ void loop()
         middleButtonPressed = false;
         rightButtonPressed = false;
     }
+
+    if (middleButtonShortPress)
+    {
+        RGB.setAllPixelBrightness(RGB_MAX_BRIGHTNESS / 2);
+
+        if (colorChoose == &RGB.colorRed)
+        {
+            colorChoose = &RGB.colorGreen; // 选择绿色分量
+        }
+        else if (colorChoose == &RGB.colorGreen)
+        {
+            colorChoose = &RGB.colorBlue; // 选择蓝色分量
+        }
+        else if (colorChoose == &RGB.colorBlue)
+        {
+            colorChoose = &RGB.colorRed; // 选择红色分量
+        }
+
+        delay(100);
+        RGB.setAllPixelBrightness(RGB_MAX_BRIGHTNESS);
+
+        middleButtonShortPress = false;
+    }
 }
 
 /*
@@ -87,7 +114,7 @@ void buttonSetup(void)
     attachInterrupt(BUTTON_MIDDLE_PIN, middleButtonISR, FALLING);
     attachInterrupt(BUTTON_RIGHT_PIN, rightButtonISR, FALLING);
 
-    colorChoose = &RGB.colorRed; // 默认选择红色分量
+    colorChoose = &RGB.colorRed;
 }
 
 /*
@@ -179,7 +206,7 @@ void middleButtonHandle(void)
 
         /* 进入配网模式 */
         NVS.saveWifiState(false);
-        delay(100);
+        delay(1000);
         ESP.restart();
     }
 }
@@ -236,18 +263,7 @@ void IRAM_ATTR middleButtonISR(void)
             isMiddleButtonHold = true;
         }
 
-        if (colorChoose == &RGB.colorRed)
-        {
-            colorChoose = &RGB.colorGreen; // 选择绿色分量
-        }
-        else if (colorChoose == &RGB.colorGreen)
-        {
-            colorChoose = &RGB.colorBlue; // 选择蓝色分量
-        }
-        else if (colorChoose == &RGB.colorBlue)
-        {
-            colorChoose = &RGB.colorRed; // 选择红色分量
-        }
+        middleButtonShortPress = true; // 设置短按任务标志
     }
 }
 

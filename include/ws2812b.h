@@ -22,7 +22,7 @@ private:
     uint8_t m_Row;             // 灯板布局行数
     uint8_t m_Col;             // 灯板布局列数
     RgbConfig m_Config;        // 灯板布线类型
-    uint8_t m_Brightness = 50; // 灯珠亮度
+    uint8_t m_Brightness; // 灯珠亮度
 
     std::vector<uint16_t> m_MapTable; // 灯珠映射表
 
@@ -34,6 +34,7 @@ public:
     void begin(void);
     void test(void);
     void setAllPixelColor(uint8_t r, uint8_t g, uint8_t b);
+    void setAllPixelBrightness(uint8_t brightness);
 
     uint8_t colorRed;   // 红色分量
     uint8_t colorGreen; // 绿色分量

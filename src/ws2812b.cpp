@@ -1,6 +1,8 @@
 #include "ws2812b.h"
 #include "nvs.h"
 
+#define MAX_BRIGHTNESS 50 // 最大亮度
+
 extern CNvs NVS; // 外部NVS对象
 
 /*
@@ -11,6 +13,8 @@ extern CNvs NVS; // 外部NVS对象
 */
 CWs2812b::CWs2812b(uint8_t pin, uint16_t num) : m_Pin(pin), m_Num(num), PIXEL(num, pin, NEO_GRB + NEO_KHZ800)
 {
+    m_Brightness = MAX_BRIGHTNESS;
+
     PIXEL.setBrightness(m_Brightness); // 设置默认亮度
     colorRed = 255;                    // 默认红色分量
     colorGreen = 255;                  // 默认绿色分量
@@ -118,5 +122,21 @@ void CWs2812b::test(void)
 void CWs2812b::setAllPixelColor(uint8_t r, uint8_t g, uint8_t b)
 {
     PIXEL.fill(PIXEL.Color(r, g, b)); // 设置所有灯珠颜色
+    PIXEL.show();
+}
+
+/*
+    @brief  设置所有灯珠亮度
+    @param  brightness  亮度值 (0-MAX_BRIGHTNESS)
+    @return 无
+*/
+void CWs2812b::setAllPixelBrightness(uint8_t brightness)
+{
+    if (brightness > MAX_BRIGHTNESS)
+    {
+        brightness = MAX_BRIGHTNESS;
+    }
+    m_Brightness = brightness;
+    PIXEL.setBrightness(m_Brightness);
     PIXEL.show();
 }
