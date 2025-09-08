@@ -78,3 +78,61 @@ void CNvs::loadColor(uint8_t &r, uint8_t &g, uint8_t &b)
     b = PREFS.getUChar("colorB", 255);
     PREFS.end();
 }
+
+/*
+    @brief  保存WiFi配网状态到NVS
+    @param  state 配网状态
+    @return 无
+*/
+void CNvs::saveWifiState(bool state)
+{
+    PREFS.begin(NAME, false);
+    PREFS.putBool("wifiState", state);
+    PREFS.end();
+}
+
+/*
+    @brief  从NVS获取WiFi配网状态
+    @param  state 配网状态
+    @return 无
+*/
+void CNvs::getWifiState(bool &state)
+{
+    PREFS.begin(NAME, true);
+    state = PREFS.getBool("wifiState", false);
+    PREFS.end();
+}
+
+/*
+    @brief  保存WiFi信息到NVS
+    @param  ssid WiFi名称
+    @param  password WiFi密码
+    @param  hasPassword 是否有密码
+    @return 无
+*/
+void CNvs::saveWifiInfo(const char* ssid, const char* password, bool hasPassword)
+{
+    PREFS.begin(NAME, false);
+    PREFS.putString("wifiSSID", ssid);
+    PREFS.putString("wifiPassword", password);
+    PREFS.putBool("wifiHasPassword", hasPassword);
+    PREFS.end();
+}
+
+/*
+    @brief  从NVS加载WiFi信息
+    @param  ssid WiFi名称
+    @param  password WiFi密码
+    @param  hasPassword 是否有密码
+    @return 无
+*/
+void CNvs::loadWifiInfo(char* ssid, char* password, bool &hasPassword)
+{
+    PREFS.begin(NAME, true);
+    String ssidStr = PREFS.getString("wifiSSID", "");
+    String passwordStr = PREFS.getString("wifiPassword", "");
+    hasPassword = PREFS.getBool("wifiHasPassword", false);
+    strncpy(ssid, ssidStr.c_str(), 40);
+    strncpy(password, passwordStr.c_str(), 40);
+    PREFS.end();
+}   

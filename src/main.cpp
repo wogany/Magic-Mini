@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include "ws2812b.h"
 #include "nvs.h"
+#include "web.h"
 
 #define RGB_NUM 40 // 灯珠数量
 #define RGB_ROW 5  // 灯板行数
@@ -30,6 +31,7 @@ uint8_t middleButtonCount = 0;  // 中按键计数
 
 CWs2812b RGB = CWs2812b(RGB_PIN, RGB_NUM); // 灯板对象
 CNvs NVS;                                  // NVS存储对象
+CWeb WEB;                                  // Web服务器对象
 
 void buttonSetup(void);
 void buttonLoop(void);
@@ -42,6 +44,7 @@ void IRAM_ATTR rightButtonISR(void);
 
 void setup()
 {
+    Serial.begin(115200);
     buttonSetup();
     NVS.init();
     delay(100);
@@ -49,10 +52,16 @@ void setup()
     delay(100);
     RGB.begin();
     delay(100);
+    WEB.init();
+    delay(100);
+    WEB.begin();
+    delay(100);
 }
 
 void loop()
 {
+    WEB.loop();
+
     if (isButtonPressed)
     {
         buttonLoop();
@@ -165,9 +174,13 @@ void middleButtonHandle(void)
     middleButtonCount++;
     if (middleButtonCount > (10000 / BUTTON_HOLD_DELAY))
     {
-        // 进入配网模式
         middleButtonCount = 0;
         isMiddleButtonHold = false;
+
+        /* 进入配网模式 */
+        NVS.saveWifiState(false);
+        delay(100);
+        ESP.restart();
     }
 }
 
