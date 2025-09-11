@@ -1,12 +1,15 @@
 #include "web.h"
 #include "nvs.h"
 #include "ws2812b.h"
+#include <ESPmDNS.h>
+#include <Update.h>
 
 extern CNvs NVS;     // 外部NVS存储对象
 extern CWs2812b RGB; // 外部WS2812B对象
 
 const char CWeb::m_ssidAp[] = "Magic-Mini";
 const char CWeb::m_passwordAp[] = "12345678";
+const char CWeb::m_webName[] = "magic-mini";
 
 const char *pageWifiConfig = "<!DOCTYPE html>"
                              "<html><head><meta charset='gbk'><meta name='viewport' content='width=device-width,initial-scale=1'>"
@@ -65,6 +68,124 @@ const char *pageConfigFail = "<!DOCTYPE html><html><head><meta charset='gbk'>"
                              " })();"
                              "</script>"
                              "</body></html>";
+
+const char *pageRoot = "<!DOCTYPE html>"
+                       "<html><head><meta charset='gbk'><meta name='viewport' content='width=device-width,initial-scale=1'>"
+                       "<title>Magic-Mini</title>"
+                       "<style>"
+                       "html,body{height:100%;margin:0;} "
+                       "body{font-family:Arial,Helvetica,sans-serif;background:#fff;display:flex;justify-content:center;align-items:flex-start;} "
+                       ".wrap{width:100%;max-width:420px;display:flex;flex-direction:column;align-items:center;box-sizing:border-box;padding-top:60px;padding-left:16px;padding-right:16px;} "
+                       "h1{font-size:42px;margin:0 0 40px 0;text-align:center;color:#222;} "
+                       ".btn{display:inline-block;padding:12px 28px;font-size:18px;text-decoration:none;color:#fff;background:#007bff;border-radius:6px;transition:background 0.3s;} "
+                       ".btn:hover{background:#0056b3;} "
+                       "</style></head><body>"
+                       "<div class='wrap'>"
+                       "<h1>Magic-Mini</h1>"
+                       "<a href='/ota' class='btn'>OTA升级</a>"
+                       "</div>"
+                       "</body></html>";
+
+const char *pageOTA = "<!DOCTYPE html>"
+                      "<html><head><meta charset='gbk'><meta name='viewport' content='width=device-width,initial-scale=1'>"
+                      "<title>Magic-Mini OTA升级</title>"
+                      "<style>"
+                      "html,body{height:100%;margin:0;} "
+                      "body{font-family:Arial,Helvetica,sans-serif;background:#fff;display:flex;justify-content:center;align-items:flex-start;} "
+                      ".wrap{width:100%;max-width:420px;display:flex;flex-direction:column;align-items:center;box-sizing:border-box;padding-top:60px;padding-left:16px;padding-right:16px;} "
+                      "h1{font-size:32px;margin:0 0 24px 0;text-align:center;color:#222;} "
+                      "form{width:100%;display:flex;flex-direction:column;align-items:center;} "
+                      ".file-container{width:100%;margin-bottom:24px;text-align:center;} "
+                      ".file-info{margin-top:8px;font-size:14px;color:#666;} "
+                      "input[type=file]{width:100%;padding:10px;margin-top:10px;} "
+                      "button{padding:12px 28px;font-size:18px;border:none;border-radius:6px;background:#007bff;color:#fff;cursor:pointer;transition:background 0.3s;} "
+                      "button:hover{background:#0056b3;} "
+                      "a{margin-top:20px;font-size:16px;color:#007bff;text-decoration:none;} "
+                      ".loading{display:none;flex-direction:column;align-items:center;margin-top:24px;} "
+                      ".spinner{width:40px;height:40px;border:4px solid rgba(0,123,255,0.2);border-radius:50%;border-top:4px solid #007bff;animation:spin 1s linear infinite;} "
+                      ".loading-text{margin-top:12px;font-size:16px;color:#666;} "
+                      "@keyframes spin{0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}} "
+                      "</style></head><body>"
+                      "<div class='wrap'>"
+                      "<h1>OTA 固件升级</h1>"
+                      "<form id='uploadForm' method='post' action='/update' enctype='multipart/form-data' onsubmit='showLoading()'>"
+                      "<div class='file-container'>"
+                      "<input type='file' name='update' accept='.bin' required />"
+                      "<div class='file-info'>请选择固件文件 (.bin)</div>"
+                      "</div>"
+                      "<button type='submit' id='uploadBtn'>开始升级</button>"
+                      "</form>"
+                      "<div id='loading' class='loading'>"
+                      "<div class='spinner'></div>"
+                      "<div class='loading-text'>正在上传固件，请稍候...</div>"
+                      "</div>"
+                      "<a href='/' id='backLink'>返回首页</a>"
+                      "</div>"
+                      "<script>"
+                      "function showLoading() {"
+                      "  document.getElementById('uploadBtn').disabled = true;"
+                      "  document.getElementById('loading').style.display = 'flex';"
+                      "  document.getElementById('backLink').style.display = 'none';"
+                      "  return true;"
+                      "}"
+                      "document.getElementById('uploadForm').addEventListener('submit', showLoading);"
+                      "</script>"
+                      "</body></html>";
+
+const char *pageOTASuccess = "<!DOCTYPE html>"
+                             "<html><head><meta charset='gbk'><meta name='viewport' content='width=device-width,initial-scale=1'>"
+                             "<title>升级成功</title>"
+                             "<style>"
+                             "html,body{height:100%;margin:0;} "
+                             "body{font-family:Arial,Helvetica,sans-serif;background:#fff;display:flex;justify-content:center;align-items:flex-start;} "
+                             ".wrap{width:100%;max-width:420px;display:flex;flex-direction:column;align-items:center;box-sizing:border-box;padding-top:80px;} "
+                             ".icon{width:80px;height:80px;border-radius:50%;background:#4CAF50;display:flex;justify-content:center;align-items:center;margin-bottom:24px;} "
+                             ".icon:before{content:'?';color:#fff;font-size:48px;} "
+                             "h1{font-size:28px;margin:0 0 16px 0;text-align:center;color:#222;} "
+                             "p{font-size:16px;margin:0;text-align:center;color:#666;} "
+                             ".timer{margin-top:16px;font-size:16px;color:#888;} "
+                             "</style></head><body>"
+                             "<div class='wrap'>"
+                             "<div class='icon'></div>"
+                             "<h1>固件升级成功</h1>"
+                             "<p>新固件已成功写入</p>"
+                             "<p class='timer'>设备将在5秒后自动重启...</p>"
+                             "</div>"
+                             "<script>"
+                             "let seconds = 5;"
+                             "const timer = document.querySelector('.timer');"
+                             "const interval = setInterval(() => {"
+                             "  seconds--;"
+                             "  timer.textContent = `设备将在${seconds}秒后自动重启...`;"
+                             "  if (seconds <= 0) {"
+                             "    clearInterval(interval);"
+                             "    window.location.href = '/';"
+                             "  }"
+                             "}, 1000);"
+                             "</script>"
+                             "</body></html>";
+
+const char *pageOTAFail = "<!DOCTYPE html>"
+                          "<html><head><meta charset='gbk'><meta name='viewport' content='width=device-width,initial-scale=1'>"
+                          "<title>升级失败</title>"
+                          "<style>"
+                          "html,body{height:100%;margin:0;} "
+                          "body{font-family:Arial,Helvetica,sans-serif;background:#fff;display:flex;justify-content:center;align-items:flex-start;} "
+                          ".wrap{width:100%;max-width:420px;display:flex;flex-direction:column;align-items:center;box-sizing:border-box;padding-top:80px;} "
+                          ".icon{width:80px;height:80px;border-radius:50%;background:#f44336;display:flex;justify-content:center;align-items:center;margin-bottom:24px;} "
+                          ".icon:before{content:'×';color:#fff;font-size:48px;} "
+                          "h1{font-size:28px;margin:0 0 16px 0;text-align:center;color:#222;} "
+                          "p{font-size:16px;margin:0 0 24px 0;text-align:center;color:#666;} "
+                          ".btn{display:inline-block;padding:10px 24px;font-size:16px;text-decoration:none;color:#fff;background:#007bff;border-radius:6px;transition:background 0.3s;} "
+                          ".btn:hover{background:#0056b3;} "
+                          "</style></head><body>"
+                          "<div class='wrap'>"
+                          "<div class='icon'></div>"
+                          "<h1>固件升级失败</h1>"
+                          "<p>无法写入固件，请检查文件后重试</p>"
+                          "<a href='/ota' class='btn'>返回重试</a>"
+                          "</div>"
+                          "</body></html>";
 
 /*
     @brief  构造函数
@@ -129,6 +250,9 @@ bool CWeb::init(void)
         WiFi.softAP(m_ssidAp, m_passwordAp, 1, 0, 1);
     }
 
+    /* 使用mDNS */
+    MDNS.begin(m_webName);
+
     return true;
 }
 
@@ -149,7 +273,13 @@ void CWeb::begin(void)
     }
     else
     {
-        /* 连接模式下打印IP地址 */
+        SERVER.on("/", [this]()
+                  { m_handleRoot(); });
+        SERVER.on("/ota", [this]()
+                  { m_handleOta(); });
+        SERVER.on("/update", HTTP_POST, [this]()
+                  { m_handleOtaState(); }, [this]()
+                  { m_handleOtaUpload(); });
     }
 
     SERVER.begin();
@@ -232,4 +362,74 @@ void CWeb::m_handleConnect(void)
     RGB.setAllPixelColor(0, 0, 0);
     delay(1000);
     ESP.restart();
+}
+
+/*
+    @brief  根目录处理函数
+    @param  无
+    @return 无
+*/
+void CWeb::m_handleRoot(void)
+{
+    SERVER.send(200, "text/html; charset=gbk", pageRoot);
+}
+
+void CWeb::m_handleOta(void)
+{
+    SERVER.send(200, "text/html; charset=gbk", pageOTA);
+}
+
+/*
+    @brief  ota升级状态页面处理函数
+    @param  无
+    @return 无
+*/
+void CWeb::m_handleOtaState(void)
+{
+    if (m_isOTASuccess)
+    {
+        SERVER.send(200, "text/html; charset=gbk", pageOTASuccess);
+        delay(4000);
+        RGB.setAllPixelColor(0, 0, 0);
+        delay(1000);
+        ESP.restart();
+    }
+    else
+    {
+        SERVER.send(200, "text/html; charset=gbk", pageOTAFail);
+    }
+}
+
+/*
+    @brief  OTA升级文件上传处理函数
+    @param  无
+    @return 无
+*/
+void CWeb::m_handleOtaUpload(void)
+{
+    HTTPUpload &upload = SERVER.upload();
+    if (upload.status == UPLOAD_FILE_START)
+    {
+        String filename = upload.filename;
+        if (!filename.startsWith("/"))
+        {
+            filename = "/" + filename;
+        }
+        Update.begin(UPDATE_SIZE_UNKNOWN);
+    }
+    else if (upload.status == UPLOAD_FILE_WRITE)
+    {
+        Update.write(upload.buf, upload.currentSize);
+    }
+    else if (upload.status == UPLOAD_FILE_END)
+    {
+        if (Update.end(true))
+        {
+            m_isOTASuccess = true;
+        }
+        else
+        {
+            m_isOTASuccess = false;
+        }
+    }
 }
