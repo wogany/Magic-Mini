@@ -6,7 +6,7 @@
 #define RGB_NUM 40            // 灯珠数量
 #define RGB_ROW 5             // 灯板行数
 #define RGB_COL 8             // 灯板列数
-#define RGB_MAX_BRIGHTNESS 50 // 最大亮度
+#define RGB_MAX_BRIGHTNESS 70 // 最大亮度
 
 #define RGB_PIN 10           // 信号输入引脚
 #define BUTTON_LEFT_PIN 18   // 左按键引脚
@@ -14,7 +14,7 @@
 #define BUTTON_RIGHT_PIN 3   // 右按键引脚
 
 #define BUTTON_DEBOUNCE_DELAY 10 // 按键消抖延时
-#define BUTTON_HOLD_DELAY 50     // 按键长按任务单元时间
+#define BUTTON_HOLD_DELAY 20     // 按键长按任务单元时间
 
 unsigned long lastTime = 0;                      // 按键长按任务上次触发时间
 volatile unsigned long leftButtonLastTime = 0;   // 左按键上次触发时间
