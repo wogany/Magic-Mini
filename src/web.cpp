@@ -4,16 +4,16 @@
 #include <ESPmDNS.h>
 #include <Update.h>
 
-extern CNvs NVS;     // Íâ²¿NVS´æ´¢¶ÔÏó
-extern CWs2812b RGB; // Íâ²¿WS2812B¶ÔÏó
+extern CNvs NVS;     // å¤–éƒ¨NVSå­˜å‚¨å¯¹è±¡
+extern CWs2812b RGB; // å¤–éƒ¨WS2812Bå¯¹è±¡
 
 const char CWeb::m_ssidAp[] = "Magic-Mini";
 const char CWeb::m_passwordAp[] = "12345678";
 const char CWeb::m_webName[] = "magic-mini";
 
 const char *pageWifiConfig = "<!DOCTYPE html>"
-                             "<html><head><meta charset='gbk'><meta name='viewport' content='width=device-width,initial-scale=1'>"
-                             "<title>Magic-Mini ÅäÍø</title>"
+                             "<html><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'>"
+                             "<title>Magic-Mini é…ç½‘</title>"
                              "<style>"
                              "html,body{height:100%;margin:0;} "
                              "body{font-family:Arial,Helvetica,sans-serif;background:#fff;display:flex;justify-content:center;align-items:flex-start;} "
@@ -27,17 +27,17 @@ const char *pageWifiConfig = "<!DOCTYPE html>"
                              "<div class='wrap'>"
                              "<h1>Magic-Mini</h1>"
                              "<form action='/connect' method='POST'>"
-                             "<div class='label'>WiFiÃû³Æ</div>"
-                             "<input type='text' name='ssid' placeholder='ÊäÈë WiFi Ãû³Æ'/>"
-                             "<div class='label'>WiFiÃÜÂë</div>"
-                             "<input type='password' name='password' placeholder='ÊäÈë WiFi ÃÜÂë'/>"
-                             "<button type='submit'>È·ÈÏ</button>"
+                             "<div class='label'>WiFiåç§°</div>"
+                             "<input type='text' name='ssid' placeholder='è¾“å…¥ WiFi åç§°'/>"
+                             "<div class='label'>WiFiå¯†ç </div>"
+                             "<input type='password' name='password' placeholder='è¾“å…¥ WiFi å¯†ç '/>"
+                             "<button type='submit'>ç¡®è®¤</button>"
                              "</form>"
                              "</div>"
                              "</body></html>";
 
-const char *pageConfigSuccess = "<!DOCTYPE html><html><head><meta charset='gbk'><meta name='viewport' content='width=device-width,initial-scale=1'>"
-                                "<title>ÅäÍø³É¹¦</title>"
+const char *pageConfigSuccess = "<!DOCTYPE html><html><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'>"
+                                "<title>é…ç½‘æˆåŠŸ</title>"
                                 "<style>"
                                 "html,body{height:100%;margin:0;} "
                                 "body{font-family:\"Microsoft YaHei\",Arial,Helvetica,sans-serif;display:flex;justify-content:center;align-items:flex-start;background:#fff;} "
@@ -45,12 +45,12 @@ const char *pageConfigSuccess = "<!DOCTYPE html><html><head><meta charset='gbk'>
                                 "h1{font-size:36px;color:#4CAF50;margin:0 0 12px 0;} "
                                 "p{font-size:20px;color:#333;margin:0;} "
                                 "</style>"
-                                "</head><body><div class='container'><h1>ÅäÍø³É¹¦</h1><p>5Ãëºó×Ô¶¯ÖØÆô¡­¡­</p></div></body></html>";
+                                "</head><body><div class='container'><h1>é…ç½‘æˆåŠŸ</h1><p>5ç§’åè‡ªåŠ¨é‡å¯â€¦â€¦</p></div></body></html>";
 
-const char *pageConfigFail = "<!DOCTYPE html><html><head><meta charset='gbk'>"
+const char *pageConfigFail = "<!DOCTYPE html><html><head><meta charset='utf-8'>"
                              "<meta http-equiv='refresh' content='3; URL=/'/>"
                              "<meta name='viewport' content='width=device-width,initial-scale=1'>"
-                             "<title>ÅäÍøÊ§°Ü</title>"
+                             "<title>é…ç½‘å¤±è´¥</title>"
                              "<style>"
                              "html,body{height:100%;margin:0;} "
                              "body{font-family:\"Microsoft YaHei\",Arial,Helvetica,sans-serif;display:flex;justify-content:center;align-items:center;background:#fff;} "
@@ -59,36 +59,44 @@ const char *pageConfigFail = "<!DOCTYPE html><html><head><meta charset='gbk'>"
                              "p{font-size:18px;color:#333;margin:0 0 8px 0;} "
                              ".count{font-size:16px;color:#666;margin-top:8px;}"
                              "</style>"
-                             "</head><body><div class='box'><h1>ÅäÍøÊ§°Ü</h1><p>ÕıÔÚ·µ»Ø</p><div class='count' id='count'>3 Ãëºó·µ»Ø</div></div>"
+                             "</head><body><div class='box'><h1>é…ç½‘å¤±è´¥</h1><p>æ­£åœ¨è¿”å›</p><div class='count' id='count'>3 ç§’åè¿”å›</div></div>"
                              "<script>"
                              " (function(){"
                              "  var t=3; var el=document.getElementById('count');"
-                             "  var iv=setInterval(function(){ t--; if(t<=0){ clearInterval(iv); return; } el.innerText = t + ' Ãëºó·µ»Ø'; },1000);"
+                             "  var iv=setInterval(function(){ t--; if(t<=0){ clearInterval(iv); return; } el.innerText = t + ' ç§’åè¿”å›'; },1000);"
                              "  setTimeout(function(){ window.location.href = '/'; }, 3000);"
                              " })();"
                              "</script>"
                              "</body></html>";
 
 const char *pageRoot = "<!DOCTYPE html>"
-                       "<html><head><meta charset='gbk'><meta name='viewport' content='width=device-width,initial-scale=1'>"
+                       "<html>"
+                       "<head>"
+                       "<meta charset=\"utf-8\" />"
+                       "<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\" />"
                        "<title>Magic-Mini</title>"
                        "<style>"
-                       "html,body{height:100%;margin:0;} "
-                       "body{font-family:Arial,Helvetica,sans-serif;background:#fff;display:flex;justify-content:center;align-items:flex-start;} "
-                       ".wrap{width:100%;max-width:420px;display:flex;flex-direction:column;align-items:center;box-sizing:border-box;padding-top:60px;padding-left:16px;padding-right:16px;} "
-                       "h1{font-size:42px;margin:0 0 40px 0;text-align:center;color:#222;} "
-                       ".btn{display:inline-block;padding:12px 28px;font-size:18px;text-decoration:none;color:#fff;background:#007bff;border-radius:6px;transition:background 0.3s;} "
-                       ".btn:hover{background:#0056b3;} "
-                       "</style></head><body>"
-                       "<div class='wrap'>"
+                       "html,"
+                       "body {height: 100%; margin: 0;}"
+                       "body {font-family: Arial, Helvetica, sans-serif; background: #fff; display: flex; justify-content: center; align-items: flex-start;}"
+                       ".wrap {width: 100%; max-width: 420px; display: flex; flex-direction: column; align-items: center; box-sizing: border-box; padding-top: 60px; padding-left: 16px; padding-right: 16px;}"
+                       "h1 {font-size: 42px; margin: 0 0 40px 0; text-align: center; color: #222;}"
+                       ".btn {display: inline-block; padding: 12px 28px; font-size: 18px; text-decoration: none; color: #fff; border-radius: 6px; transition: all 0.3s; margin-bottom: 20px; opacity: 1;}"
+                       ".btn:hover {opacity: 0.9; transform: scale(0.99); transform:translateY(-2px);}"
+                       "</style>"
+                       "</head>"
+                       "<body>"
+                       "<div class=\"wrap\">"
                        "<h1>Magic-Mini</h1>"
-                       "<a href='/ota' class='btn'>OTAÉı¼¶</a>"
+                       "<a href=\"/color\" class=\"btn\" style=\"background-color: #007bff;\">è°ƒæ•´é¢œè‰²</a>"
+                       "<a href=\"/ota\" class=\"btn\" style=\"background-color: #28a745;\">OTAå‡çº§</a>"
                        "</div>"
-                       "</body></html>";
+                       "</body>"
+                       "</html>";
 
 const char *pageOTA = "<!DOCTYPE html>"
-                      "<html><head><meta charset='gbk'><meta name='viewport' content='width=device-width,initial-scale=1'>"
-                      "<title>Magic-Mini OTAÉı¼¶</title>"
+                      "<html><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'>"
+                      "<title>Magic-Mini OTAå‡çº§</title>"
                       "<style>"
                       "html,body{height:100%;margin:0;} "
                       "body{font-family:Arial,Helvetica,sans-serif;background:#fff;display:flex;justify-content:center;align-items:flex-start;} "
@@ -107,19 +115,19 @@ const char *pageOTA = "<!DOCTYPE html>"
                       "@keyframes spin{0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}} "
                       "</style></head><body>"
                       "<div class='wrap'>"
-                      "<h1>OTA ¹Ì¼şÉı¼¶</h1>"
+                      "<h1>OTA å›ºä»¶å‡çº§</h1>"
                       "<form id='uploadForm' method='post' action='/update' enctype='multipart/form-data' onsubmit='showLoading()'>"
                       "<div class='file-container'>"
                       "<input type='file' name='update' accept='.bin' required />"
-                      "<div class='file-info'>ÇëÑ¡Ôñ¹Ì¼şÎÄ¼ş (.bin)</div>"
+                      "<div class='file-info'>è¯·é€‰æ‹©å›ºä»¶æ–‡ä»¶ (.bin)</div>"
                       "</div>"
-                      "<button type='submit' id='uploadBtn'>¿ªÊ¼Éı¼¶</button>"
+                      "<button type='submit' id='uploadBtn'>å¼€å§‹å‡çº§</button>"
                       "</form>"
                       "<div id='loading' class='loading'>"
                       "<div class='spinner'></div>"
-                      "<div class='loading-text'>ÕıÔÚÉÏ´«¹Ì¼ş£¬ÇëÉÔºò...</div>"
+                      "<div class='loading-text'>æ­£åœ¨ä¸Šä¼ å›ºä»¶ï¼Œè¯·ç¨å€™...</div>"
                       "</div>"
-                      "<a href='/' id='backLink'>·µ»ØÊ×Ò³</a>"
+                      "<a href='/' id='backLink'>è¿”å›é¦–é¡µ</a>"
                       "</div>"
                       "<script>"
                       "function showLoading() {"
@@ -133,8 +141,8 @@ const char *pageOTA = "<!DOCTYPE html>"
                       "</body></html>";
 
 const char *pageOTASuccess = "<!DOCTYPE html>"
-                             "<html><head><meta charset='gbk'><meta name='viewport' content='width=device-width,initial-scale=1'>"
-                             "<title>Éı¼¶³É¹¦</title>"
+                             "<html><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'>"
+                             "<title>å‡çº§æˆåŠŸ</title>"
                              "<style>"
                              "html,body{height:100%;margin:0;} "
                              "body{font-family:Arial,Helvetica,sans-serif;background:#fff;display:flex;justify-content:center;align-items:flex-start;} "
@@ -147,16 +155,16 @@ const char *pageOTASuccess = "<!DOCTYPE html>"
                              "</style></head><body>"
                              "<div class='wrap'>"
                              "<div class='icon'></div>"
-                             "<h1>¹Ì¼şÉı¼¶³É¹¦</h1>"
-                             "<p>ĞÂ¹Ì¼şÒÑ³É¹¦Ğ´Èë</p>"
-                             "<p class='timer'>Éè±¸½«ÔÚ5Ãëºó×Ô¶¯ÖØÆô...</p>"
+                             "<h1>å›ºä»¶å‡çº§æˆåŠŸ</h1>"
+                             "<p>æ–°å›ºä»¶å·²æˆåŠŸå†™å…¥</p>"
+                             "<p class='timer'>è®¾å¤‡å°†åœ¨5ç§’åè‡ªåŠ¨é‡å¯...</p>"
                              "</div>"
                              "<script>"
                              "let seconds = 5;"
                              "const timer = document.querySelector('.timer');"
                              "const interval = setInterval(() => {"
                              "  seconds--;"
-                             "  timer.textContent = `Éè±¸½«ÔÚ${seconds}Ãëºó×Ô¶¯ÖØÆô...`;"
+                             "  timer.textContent = `è®¾å¤‡å°†åœ¨${seconds}ç§’åè‡ªåŠ¨é‡å¯...`;"
                              "  if (seconds <= 0) {"
                              "    clearInterval(interval);"
                              "    window.location.href = '/';"
@@ -166,14 +174,14 @@ const char *pageOTASuccess = "<!DOCTYPE html>"
                              "</body></html>";
 
 const char *pageOTAFail = "<!DOCTYPE html>"
-                          "<html><head><meta charset='gbk'><meta name='viewport' content='width=device-width,initial-scale=1'>"
-                          "<title>Éı¼¶Ê§°Ü</title>"
+                          "<html><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'>"
+                          "<title>å‡çº§å¤±è´¥</title>"
                           "<style>"
                           "html,body{height:100%;margin:0;} "
                           "body{font-family:Arial,Helvetica,sans-serif;background:#fff;display:flex;justify-content:center;align-items:flex-start;} "
                           ".wrap{width:100%;max-width:420px;display:flex;flex-direction:column;align-items:center;box-sizing:border-box;padding-top:80px;} "
                           ".icon{width:80px;height:80px;border-radius:50%;background:#f44336;display:flex;justify-content:center;align-items:center;margin-bottom:24px;} "
-                          ".icon:before{content:'¡Á';color:#fff;font-size:48px;} "
+                          ".icon:before{content:'Ã—';color:#fff;font-size:48px;} "
                           "h1{font-size:28px;margin:0 0 16px 0;text-align:center;color:#222;} "
                           "p{font-size:16px;margin:0 0 24px 0;text-align:center;color:#666;} "
                           ".btn{display:inline-block;padding:10px 24px;font-size:16px;text-decoration:none;color:#fff;background:#007bff;border-radius:6px;transition:background 0.3s;} "
@@ -181,41 +189,323 @@ const char *pageOTAFail = "<!DOCTYPE html>"
                           "</style></head><body>"
                           "<div class='wrap'>"
                           "<div class='icon'></div>"
-                          "<h1>¹Ì¼şÉı¼¶Ê§°Ü</h1>"
-                          "<p>ÎŞ·¨Ğ´Èë¹Ì¼ş£¬Çë¼ì²éÎÄ¼şºóÖØÊÔ</p>"
-                          "<a href='/ota' class='btn'>·µ»ØÖØÊÔ</a>"
+                          "<h1>å›ºä»¶å‡çº§å¤±è´¥</h1>"
+                          "<p>æ— æ³•å†™å…¥å›ºä»¶ï¼Œè¯·æ£€æŸ¥æ–‡ä»¶åé‡è¯•</p>"
+                          "<a href='/ota' class='btn'>è¿”å›é‡è¯•</a>"
                           "</div>"
                           "</body></html>";
 
+const char *pageColor = "<!DOCTYPE html>"
+                        "<html lang=\"zh-CN\">"
+                        "<head>"
+                        "<meta charset=\"UTF-8\" />"
+                        "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />"
+                        "<title>Magic-Mini è°ƒå…‰æ§åˆ¶</title>"
+                        "<style>"
+                        "* {margin: 0; padding: 0; box-sizing: border-box; font-family: \"Arial\", \"åæ–‡ç»†é»‘\";}"
+                        "body {min-height: 100dvh; max-width: 100vw; padding: 20px;}"
+                        ".container {margin: 0 auto; width: 100%; padding: 20px; max-width: 450px;}"
+                        "h1 {text-align: center; color: rgb(0, 123, 255); margin: 10px 0 20px 0; font-size: 24px;}"
+                        ".color-wheel-container {position: relative; width: 100%; padding-top: 100%; margin-bottom: 30px;}"
+                        "#colorWheel {position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 50%; box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);}"
+                        "#colorSelector {position: absolute; width: 20px; height: 20px; border: 2px solid white; border-radius: 50%; box-shadow: 0 0 5px rgba(0, 0, 0, 0.5); transform: translate(-50%, -50%); cursor: grab; user-select: none;}"
+                        "#colorSelector:active {cursor: grabbing;}"
+                        ".current-color {width: 100%; height: 60px; border-radius: 8px; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; color: white; font-size: 16px; font-weight: bold; text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);}"
+                        ".controls {display: flex; flex-direction: column; gap: 15px;}"
+                        "button {border: none; border-radius: 8px; font-weight: bold; cursor: pointer; padding: 12px; font-size: 14px;}"
+                        "#setColorBtn {background-color: rgb(0, 123, 255); color: white;}"
+                        "#dialog {position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 150px; height: 150px; border: none; outline: none; border-radius: 12px; background-color: rgba(0, 0, 0, 0.3); color: white;}"
+                        "#dialogMessage {font-size: 16px; font-weight: bold; text-align: center; line-height: 150px;}"
+                        "</style>"
+                        "</head>"
+                        "<body>"
+                        "<div class=\"container\">"
+                        "<h1>Magic-Mini è°ƒå…‰æ§åˆ¶</h1>"
+                        "<div class=\"color-wheel-container\">"
+                        "<canvas id=\"colorWheel\"></canvas>"
+                        "<div id=\"colorSelector\"></div>"
+                        "</div>"
+                        "<div class=\"current-color\" id=\"currentColor\">RGB(0, 0, 0)</div>"
+                        "<div class=\"controls\">"
+                        "<button id=\"setColorBtn\">åº”ç”¨é¢œè‰²</button>"
+                        "</div>"
+                        "</div>"
+                        "<dialog id=\"dialog\">"
+                        "<p id=\"dialogMessage\">message</p>"
+                        "</dialog>"
+                        "<script>"
+                        "let canvas, ctx; "
+                        "let colorWheel, colorSelector, currentColor; "
+                        "let setColorBtn; "
+                        "let isDragging = false; "
+                        "let centerX, centerY, radius; "
+                        "let deviceAddress = \"magic-mini.local\"; "
+                        "let isConnected = false; "
+                        "let dialog, dialogMessage;"
+                        "function init() {"
+                        "colorWheel = document.getElementById(\"colorWheel\");"
+                        "colorSelector = document.getElementById(\"colorSelector\");"
+                        "currentColor = document.getElementById(\"currentColor\");"
+                        "setColorBtn = document.getElementById(\"setColorBtn\");"
+                        "dialog = document.getElementById(\"dialog\");"
+                        "dialogMessage = document.getElementById(\"dialogMessage\");"
+                        "canvas = colorWheel;"
+                        "ctx = canvas.getContext(\"2d\");"
+                        "redrawCanvas();"
+                        "window.addEventListener(\"resize\", redrawCanvas); "
+                        "colorWheel.addEventListener(\"mousedown\", startDrag);"
+                        "colorWheel.addEventListener(\"touchstart\", startDrag, { passive: true });"
+                        "document.addEventListener(\"mousemove\", drag);"
+                        "document.addEventListener(\"touchmove\", drag, { passive: false });"
+                        "document.addEventListener(\"mouseup\", endDrag);"
+                        "document.addEventListener(\"touchend\", endDrag);"
+                        "setColorBtn.addEventListener(\"click\", setColor);"
+                        "getColor();"
+                        "}"
+                        "function redrawCanvas() {"
+                        "const container = colorWheel.parentElement;"
+                        "const size = container.clientWidth;"
+                        "canvas.width = size;"
+                        "canvas.height = size;"
+                        "centerX = size / 2; "
+                        "centerY = size / 2; "
+                        "radius = size / 2 - 5; "
+                        "drawColorWheel();"
+                        "}"
+                        "function drawColorWheel() {"
+                        "const gradient = ctx.createConicGradient(0, centerX, centerY); "
+                        "gradient.addColorStop(0, \"#ff0000\"); "
+                        "gradient.addColorStop(1 / 6, \"#ffff00\"); "
+                        "gradient.addColorStop(2 / 6, \"#00ff00\"); "
+                        "gradient.addColorStop(3 / 6, \"#00ffff\"); "
+                        "gradient.addColorStop(4 / 6, \"#0000ff\"); "
+                        "gradient.addColorStop(5 / 6, \"#ff00ff\"); "
+                        "gradient.addColorStop(1, \"#ff0000\"); "
+                        "ctx.beginPath();"
+                        "ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);"
+                        "ctx.fillStyle = gradient;"
+                        "ctx.fill();"
+                        "const innerRadius = radius * 0.8;"
+                        "const innerGradient = ctx.createRadialGradient("
+                        "centerX,"
+                        "centerY,"
+                        "0,"
+                        "centerX,"
+                        "centerY,"
+                        "innerRadius"
+                        ");"
+                        "innerGradient.addColorStop(0, \"#ffffff\");"
+                        "innerGradient.addColorStop(1, \"rgba(255, 255, 255, 0)\");"
+                        "ctx.beginPath();"
+                        "ctx.arc(centerX, centerY, innerRadius, 0, 2 * Math.PI);"
+                        "ctx.fillStyle = innerGradient;"
+                        "ctx.fill();"
+                        "}"
+                        "function startDrag(e) {"
+                        "e.preventDefault(); "
+                        "isDragging = true; "
+                        "moveSelector(e); "
+                        "}"
+                        "function drag(e) {"
+                        "if (isDragging) {"
+                        "e.preventDefault(); "
+                        "moveSelector(e); "
+                        "}"
+                        "}"
+                        "function endDrag() {"
+                        "isDragging = false; "
+                        "}"
+                        "function moveSelector(e) {"
+                        "let clientX, clientY;"
+                        "if (e.type.includes(\"mouse\")) {"
+                        "clientX = e.clientX;"
+                        "clientY = e.clientY;"
+                        "} else {"
+                        "clientX = e.touches[0].clientX;"
+                        "clientY = e.touches[0].clientY;"
+                        "}"
+                        "const rect = canvas.getBoundingClientRect();"
+                        "const x = clientX - rect.left;"
+                        "const y = clientY - rect.top;"
+                        "const dx = x - centerX;"
+                        "const dy = y - centerY;"
+                        "const distance = Math.sqrt(dx * dx + dy * dy);"
+                        "let constrainedX = x;"
+                        "let constrainedY = y;"
+                        "const selectorRadius = 10;"
+                        "if (distance > radius - selectorRadius) {"
+                        "const ratio = (radius - selectorRadius) / distance;"
+                        "constrainedX = centerX + dx * ratio;"
+                        "constrainedY = centerY + dy * ratio;"
+                        "}"
+                        "colorSelector.style.left = `${constrainedX}px`;"
+                        "colorSelector.style.top = `${constrainedY}px`;"
+                        "updateCurrentColor(constrainedX, constrainedY);"
+                        "}"
+                        "function updateCurrentColor(x, y) {"
+                        "const imageData = ctx.getImageData(x, y, 1, 1);"
+                        "const pixel = imageData.data;"
+                        "let r = pixel[0];"
+                        "let g = pixel[1];"
+                        "let b = pixel[2];"
+                        "const threshold = 240; "
+                        "if (r > threshold && g > threshold && b > threshold) {"
+                        "const dx = x - centerX;"
+                        "const dy = y - centerY;"
+                        "const distance = Math.sqrt(dx * dx + dy * dy);"
+                        "const innerRadius = radius * 0.8;"
+                        "if (distance < innerRadius) {"
+                        "const ratio = distance / innerRadius;"
+                        "if (ratio < 0.3) {"
+                        "r = 255;"
+                        "g = 255;"
+                        "b = 255;"
+                        "} else {"
+                        "r = Math.min(255, Math.max(0, r));"
+                        "g = Math.min(255, Math.max(0, g));"
+                        "b = Math.min(255, Math.max(0, b));"
+                        "}"
+                        "}"
+                        "}"
+                        "currentColor.style.backgroundColor = `rgb(${r}, ${g}, ${b})`;"
+                        "currentColor.textContent = `RGB(${r}, ${g}, ${b})`;"
+                        "return { r, g, b };"
+                        "}"
+                        "function findClosestColorPosition(targetR, targetG, targetB) {"
+                        "const searchRadius = radius;"
+                        "let bestMatch = null;"
+                        "let minDifference = Infinity;"
+                        "const step = 10;"
+                        "for (let x = centerX - searchRadius; x <= centerX + searchRadius; x += step) {"
+                        "for (let y = centerY - searchRadius; y <= centerY + searchRadius; y += step) {"
+                        "const dx = x - centerX;"
+                        "const dy = y - centerY;"
+                        "const distance = Math.sqrt(dx * dx + dy * dy);"
+                        "if (distance <= searchRadius) {"
+                        "const imageData = ctx.getImageData(x, y, 1, 1);"
+                        "const pixel = imageData.data;"
+                        "const r = pixel[0];"
+                        "const g = pixel[1];"
+                        "const b = pixel[2];"
+                        "const diff = Math.sqrt("
+                        "Math.pow(r - targetR, 2) +"
+                        "Math.pow(g - targetG, 2) +"
+                        "Math.pow(b - targetB, 2)"
+                        ");"
+                        "if (diff < minDifference) {"
+                        "minDifference = diff;"
+                        "bestMatch = { x, y, r, g, b, diff };"
+                        "}"
+                        "}"
+                        "}"
+                        "}"
+                        "return bestMatch;"
+                        "}"
+                        "function setSelectorPositionByColor(r, g, b) {"
+                        "const closest = findClosestColorPosition(r, g, b);"
+                        "if (closest) {"
+                        "x = closest.x;"
+                        "y = closest.y;"
+                        "console.log("
+                        "`æ‰¾åˆ°æ›´æ¥è¿‘çš„é¢œè‰²ä½ç½®: x=${x.toFixed(2)}, y=${y.toFixed("
+                        "2"
+                        ")}, å·®å¼‚=${closest.diff.toFixed(2)}`"
+                        ");"
+                        "}"
+                        "colorSelector.style.left = `${x}px`;"
+                        "colorSelector.style.top = `${y}px`;"
+                        "updateCurrentColor(x, y);"
+                        "}"
+                        "async function setColor() {"
+                        "dialogMessage.textContent = \"æ”¹å˜é¢œè‰²ä¸­...\";"
+                        "dialog.showModal(); "
+                        "const x = parseFloat(colorSelector.style.left);"
+                        "const y = parseFloat(colorSelector.style.top);"
+                        "const { r, g, b } = updateCurrentColor(x, y);"
+                        "try {"
+                        "const response = await fetch("
+                        "`http://${deviceAddress}/set-color?r=${r}&g=${g}&b=${b}`,"
+                        "{"
+                        "method: \"POST\","
+                        "}"
+                        ");"
+                        "if (response.ok) {"
+                        "dialogMessage.textContent = `è®¾ç½®æˆåŠŸ`;"
+                        "} else {"
+                        "throw new Error(\"è®¾ç½®é¢œè‰²å¤±è´¥\");"
+                        "}"
+                        "} catch (error) {"
+                        "dialog.close(); "
+                        "dialogMessage.textContent = error.message;"
+                        "dialog.showModal(); "
+                        "} finally {"
+                        "setTimeout(() => {"
+                        "dialog.close(); "
+                        "}, 1000);"
+                        "}"
+                        "}"
+                        "async function getColor() {"
+                        "dialogMessage.textContent = \"è·å–é¢œè‰²ä¸­...\";"
+                        "dialog.showModal(); "
+                        "try {"
+                        "const response = await fetch(`http://${deviceAddress}/current-color`, {});"
+                        "if (response.ok) {"
+                        "dialogMessage.textContent = `è·å–æˆåŠŸ`;"
+                        "const text = await response.text();"
+                        "const colorValues = text.split(\",\");"
+                        "const r = parseInt(colorValues[0]);"
+                        "const g = parseInt(colorValues[1]);"
+                        "const b = parseInt(colorValues[2]);"
+                        "updateCurrentColor(r, g, b);"
+                        "setSelectorPositionByColor(r, g, b);"
+                        "} else {"
+                        "throw new Error(\"è·å–é¢œè‰²å¤±è´¥\");"
+                        "}"
+                        "} catch (error) {"
+                        "dialog.close(); "
+                        "dialogMessage.textContent = error.message;"
+                        "dialog.showModal(); "
+                        "setTimeout(() => {"
+                        "dialog.close(); "
+                        "}, 1000);"
+                        "} finally {"
+                        "dialog.close(); "
+                        "}"
+                        "}"
+                        "window.addEventListener(\"load\", init);"
+                        "</script>"
+                        "</body>"
+                        "</html>";
+
 /*
-    @brief  ¹¹Ôìº¯Êı
-    @param  ÎŞ
-    @return ÎŞ
+    @brief  æ„é€ å‡½æ•°
+    @param  æ— 
+    @return æ— 
 */
 CWeb::CWeb(void) : SERVER(80)
 {
 }
 
 /*
-    @brief  Îö¹¹º¯Êı
-    @param  ÎŞ
-    @return ÎŞ
+    @brief  ææ„å‡½æ•°
+    @param  æ— 
+    @return æ— 
 */
 CWeb::~CWeb(void)
 {
 }
 
 /*
-    @brief  wifi³õÊ¼»¯
-    @param  ÎŞ
-    @return ³É¹¦Óë·ñ
+    @brief  wifiåˆå§‹åŒ–
+    @param  æ— 
+    @return æˆåŠŸä¸å¦
 */
 bool CWeb::init(void)
 {
     NVS.getWifiState(m_wifiState);
     if (m_wifiState)
     {
-        /* Ê¹ÓÃSTAÄ£Ê½ */
+        /* ä½¿ç”¨STAæ¨¡å¼ */
         WiFi.mode(WIFI_STA);
         WiFi.setHostname("Magic-Mini");
         NVS.loadWifiInfo(m_ssidSta, m_passwordSta, m_haveStaPassword);
@@ -228,15 +518,15 @@ bool CWeb::init(void)
             WiFi.begin(m_ssidSta);
         }
 
-        /* µÈ´ıÁ¬½Ó */
+        /* ç­‰å¾…è¿æ¥ */
         unsigned long start = millis();
-        const unsigned long timeout = 10000; // 10 Ãë
+        const unsigned long timeout = 10000; // 10 ç§’
         while (WiFi.status() != WL_CONNECTED && (millis() - start) < timeout)
         {
             delay(200);
         }
 
-        /* Á¬½ÓÊ§°Ü£¬¹Ø±Õwifi */
+        /* è¿æ¥å¤±è´¥ï¼Œå…³é—­wifi */
         if (WiFi.status() != WL_CONNECTED)
         {
             WiFi.disconnect(true, true);
@@ -245,27 +535,27 @@ bool CWeb::init(void)
     }
     else
     {
-        /* Ê¹ÓÃAPÄ£Ê½ */
+        /* ä½¿ç”¨APæ¨¡å¼ */
         WiFi.mode(WIFI_AP_STA);
         WiFi.softAP(m_ssidAp, m_passwordAp, 1, 0, 1);
     }
 
-    /* Ê¹ÓÃmDNS */
+    /* ä½¿ç”¨mDNS */
     MDNS.begin(m_webName);
 
     return true;
 }
 
 /*
-    @brief  Web·şÎñÆ÷³õÊ¼»¯
-    @param  ÎŞ
-    @return ÎŞ
+    @brief  WebæœåŠ¡å™¨åˆå§‹åŒ–
+    @param  æ— 
+    @return æ— 
 */
 void CWeb::begin(void)
 {
     if (!m_wifiState)
     {
-        /* ÅäÍøÄ£Ê½ */
+        /* é…ç½‘æ¨¡å¼ */
         SERVER.on("/", [this]()
                   { m_handleWifiConfig(); });
         SERVER.on("/connect", [this]()
@@ -280,15 +570,21 @@ void CWeb::begin(void)
         SERVER.on("/update", HTTP_POST, [this]()
                   { m_handleOtaState(); }, [this]()
                   { m_handleOtaUpload(); });
+        SERVER.on("/color", [this]()
+                  { m_handleColor(); });
+        SERVER.on("/set-color", [this]()
+                  { m_handleColorSet(); });
+        SERVER.on("/current-color", [this]()
+                  { m_handleColorGet(); });
     }
 
     SERVER.begin();
 }
 
 /*
-    @brief  Web·şÎñÆ÷Ñ­»·´¦Àí
-    @param  ÎŞ
-    @return ÎŞ
+    @brief  WebæœåŠ¡å™¨å¾ªç¯å¤„ç†
+    @param  æ— 
+    @return æ— 
 */
 void CWeb::loop(void)
 {
@@ -296,33 +592,33 @@ void CWeb::loop(void)
 }
 
 /*
-    @brief  WiFiÅäÍøÍøÒ³´¦Àíº¯Êı
-    @param  ÎŞ
-    @return ÎŞ
+    @brief  WiFié…ç½‘ç½‘é¡µå¤„ç†å‡½æ•°
+    @param  æ— 
+    @return æ— 
 */
 void CWeb::m_handleWifiConfig(void)
 {
-    SERVER.send(200, "text/html; charset=gbk", pageWifiConfig);
+    SERVER.send(200, "text/html; charset=utf-8", pageWifiConfig);
 }
 
 /*
-    @brief  Á¬½ÓWiFi´¦Àíº¯Êı
-    @param  ÎŞ
-    @return ÎŞ
+    @brief  è¿æ¥WiFiå¤„ç†å‡½æ•°
+    @param  æ— 
+    @return æ— 
 */
 void CWeb::m_handleConnect(void)
 {
     String ssid = SERVER.arg("ssid");
     String password = SERVER.arg("password");
 
-    /* ¼ì²éÊÇ·ñÓĞSSID */
+    /* æ£€æŸ¥æ˜¯å¦æœ‰SSID */
     if (ssid.length() == 0)
     {
-        SERVER.send(200, "text/html; charset=gbk", pageConfigFail);
+        SERVER.send(400, "text/html; charset=utf-8", pageConfigFail);
         return;
     }
 
-    /* ³¢ÊÔÁ¬½ÓWiFi */
+    /* å°è¯•è¿æ¥WiFi */
     if (password.length() > 0)
     {
         WiFi.begin(ssid.c_str(), password.c_str());
@@ -333,22 +629,22 @@ void CWeb::m_handleConnect(void)
     }
 
     unsigned long start = millis();
-    const unsigned long timeout = 10000; // 10 Ãë
+    const unsigned long timeout = 10000; // 10 ç§’
     while (WiFi.status() != WL_CONNECTED && (millis() - start) < timeout)
     {
         delay(200);
     }
 
-    /* Á¬½ÓÊ§°Ü£¬ÖØĞÂÅäÍø */
+    /* è¿æ¥å¤±è´¥ï¼Œé‡æ–°é…ç½‘ */
     if (WiFi.status() != WL_CONNECTED)
     {
         WiFi.disconnect(true, true);
-        SERVER.send(200, "text/html; charset=gbk", pageConfigFail);
+        SERVER.send(400, "text/html; charset=utf-8", pageConfigFail);
         return;
     }
 
-    /* Á¬½Ó³É¹¦ */
-    SERVER.send(200, "text/html; charset=gbk", pageConfigSuccess);
+    /* è¿æ¥æˆåŠŸ */
+    SERVER.send(200, "text/html; charset=utf-8", pageConfigSuccess);
     if (password.length() > 0)
     {
         NVS.saveWifiInfo(ssid.c_str(), password.c_str(), true);
@@ -365,30 +661,30 @@ void CWeb::m_handleConnect(void)
 }
 
 /*
-    @brief  ¸ùÄ¿Â¼´¦Àíº¯Êı
-    @param  ÎŞ
-    @return ÎŞ
+    @brief  æ ¹ç›®å½•å¤„ç†å‡½æ•°
+    @param  æ— 
+    @return æ— 
 */
 void CWeb::m_handleRoot(void)
 {
-    SERVER.send(200, "text/html; charset=gbk", pageRoot);
+    SERVER.send(200, "text/html; charset=utf-8", pageRoot);
 }
 
 void CWeb::m_handleOta(void)
 {
-    SERVER.send(200, "text/html; charset=gbk", pageOTA);
+    SERVER.send(200, "text/html; charset=utf-8", pageOTA);
 }
 
 /*
-    @brief  otaÉı¼¶×´Ì¬Ò³Ãæ´¦Àíº¯Êı
-    @param  ÎŞ
-    @return ÎŞ
+    @brief  otaå‡çº§çŠ¶æ€é¡µé¢å¤„ç†å‡½æ•°
+    @param  æ— 
+    @return æ— 
 */
 void CWeb::m_handleOtaState(void)
 {
     if (m_isOTASuccess)
     {
-        SERVER.send(200, "text/html; charset=gbk", pageOTASuccess);
+        SERVER.send(200, "text/html; charset=utf-8", pageOTASuccess);
         delay(4000);
         RGB.setAllPixelColor(0, 0, 0);
         delay(1000);
@@ -396,14 +692,14 @@ void CWeb::m_handleOtaState(void)
     }
     else
     {
-        SERVER.send(200, "text/html; charset=gbk", pageOTAFail);
+        SERVER.send(400, "text/html; charset=utf-8", pageOTAFail);
     }
 }
 
 /*
-    @brief  OTAÉı¼¶ÎÄ¼şÉÏ´«´¦Àíº¯Êı
-    @param  ÎŞ
-    @return ÎŞ
+    @brief  OTAå‡çº§æ–‡ä»¶ä¸Šä¼ å¤„ç†å‡½æ•°
+    @param  æ— 
+    @return æ— 
 */
 void CWeb::m_handleOtaUpload(void)
 {
@@ -432,4 +728,47 @@ void CWeb::m_handleOtaUpload(void)
             m_isOTASuccess = false;
         }
     }
+}
+
+void CWeb::m_handleColor(void)
+{
+    SERVER.send(200, "text/html; charset=utf-8", pageColor);
+}
+
+/*
+    @brief  é¢œè‰²è®¾ç½®å¤„ç†å‡½æ•°ï¼Œå“åº”é¢œè‰²è®¾ç½®è¯·æ±‚ï¼Œæ›´æ–°LEDé¢œè‰²
+    @param  æ— 
+    @return æ— 
+*/
+void CWeb::m_handleColorSet(void) // é¢œè‰²è®¾ç½®å¤„ç†å‡½æ•°ï¼Œå“åº”é¢œè‰²è®¾ç½®è¯·æ±‚ï¼Œæ›´æ–°LEDé¢œè‰²
+{
+    // ä»URLå‚æ•°è·å–RGBå€¼
+    int r = SERVER.arg("r").toInt();
+    int g = SERVER.arg("g").toInt();
+    int b = SERVER.arg("b").toInt();
+
+    // è®¾ç½®LEDé¢œè‰²
+    RGB.setAllPixelColor(r, g, b);
+
+    // ä¿å­˜å½“å‰é¢œè‰²åˆ°NVS
+    NVS.saveColor(r, g, b);
+
+    // è¿”å›æˆåŠŸå“åº”
+    SERVER.send(200, "text/plain; charset=utf-8", "OK: Color updated");
+}
+
+/*
+    @brief  é¢œè‰²è·å–å¤„ç†å‡½æ•°ï¼Œå“åº”é¢œè‰²è·å–è¯·æ±‚ï¼Œè¿”å›å½“å‰LEDé¢œè‰²
+    @param  æ— 
+    @return æ— 
+*/
+void CWeb::m_handleColorGet(void) // é¢œè‰²è·å–å¤„ç†å‡½æ•°ï¼Œå“åº”é¢œè‰²è·å–è¯·æ±‚ï¼Œè¿”å›å½“å‰LEDé¢œè‰²
+{
+    // ä»NVSè·å–å½“å‰é¢œè‰²
+    uint8_t r, g, b;
+    NVS.loadColor(r, g, b);
+
+    // è¿”å›å½“å‰é¢œè‰²å€¼ï¼Œæ ¼å¼ä¸º "r,g,b"
+    String response = String(r) + "," + String(g) + "," + String(b);
+    SERVER.send(200, "text/plain; charset=utf-8", response);
 }
