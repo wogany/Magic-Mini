@@ -3,27 +3,27 @@
 #define NAME "my_config"
 
 /*
-    @brief  ¹¹Ôìº¯Êı
-    @param  ÎŞ
-    @return ÎŞ
+    @brief  æ„é€ å‡½æ•°
+    @param  æ— 
+    @return æ— 
 */
 CNvs::CNvs(void)
 {
 }
 
 /*
-    @brief  Îö¹¹º¯Êı
-    @param  ÎŞ
-    @return ÎŞ
+    @brief  ææ„å‡½æ•°
+    @param  æ— 
+    @return æ— 
 */
 CNvs::~CNvs(void)
 {
 }
 
 /*
-    @brief  NVS³õÊ¼»¯
-    @param  ÎŞ
-    @return ³É¹¦Óë·ñ
+    @brief  NVSåˆå§‹åŒ–
+    @param  æ— 
+    @return æˆåŠŸä¸å¦
 */
 bool CNvs::init(void)
 {
@@ -33,56 +33,56 @@ bool CNvs::init(void)
 }
 
 /*
-    @brief  ±£´æÑÕÉ«µ½NVS
-    @param  r ºìÉ«·ÖÁ¿
-    @param  g ÂÌÉ«·ÖÁ¿
-    @param  b À¶É«·ÖÁ¿
-    @return ÎŞ
+    @brief  ä¿å­˜é¢œè‰²åˆ°NVS
+    @param  r çº¢è‰²åˆ†é‡
+    @param  g ç»¿è‰²åˆ†é‡
+    @param  b è“è‰²åˆ†é‡
+    @return æ— 
 */
 void CNvs::saveColor(uint8_t r, uint8_t g, uint8_t b)
 {
     PREFS.begin(NAME, false);
     uint8_t lastR, lastG, lastB;
-    /*  »ñÈ¡ÉÏ´Î±£´æµÄÑÕÉ« */
-    lastR = PREFS.getUChar("colorR", 0);
-    lastG = PREFS.getUChar("colorG", 0);
-    lastB = PREFS.getUChar("colorB", 0);
-    /* ¼ì²âÑÕÉ«ÊÇ·ñ±ä»¯ */
+    /*  è·å–ä¸Šæ¬¡ä¿å­˜çš„é¢œè‰² */
+    lastR = PREFS.getUChar("colorR", 0); // ä»NVSè·å–çº¢è‰²åˆ†é‡ï¼Œé»˜è®¤å€¼ä¸º0
+    lastG = PREFS.getUChar("colorG", 0); // ä»NVSè·å–ç»¿è‰²åˆ†é‡ï¼Œé»˜è®¤å€¼ä¸º0
+    lastB = PREFS.getUChar("colorB", 0); // ä»NVSè·å–è“è‰²åˆ†é‡ï¼Œé»˜è®¤å€¼ä¸º0
+    /* æ£€æµ‹é¢œè‰²æ˜¯å¦å˜åŒ– */
     if (lastR != r)
     {
-        PREFS.putUChar("colorR", r);
+        PREFS.putUChar("colorR", r); // ä¿å­˜çº¢è‰²åˆ†é‡åˆ°NVS
     }
     if (lastG != g)
     {
-        PREFS.putUChar("colorG", g);
+        PREFS.putUChar("colorG", g); // ä¿å­˜ç»¿è‰²åˆ†é‡åˆ°NVS
     }
     if (lastB != b)
     {
-        PREFS.putUChar("colorB", b);
+        PREFS.putUChar("colorB", b); // ä¿å­˜è“è‰²åˆ†é‡åˆ°NVS
     }
     PREFS.end();
 }
 
 /*
-    @brief  ´ÓNVS¼ÓÔØÑÕÉ«
-    @param  r ºìÉ«·ÖÁ¿ÒıÓÃ
-    @param  g ÂÌÉ«·ÖÁ¿ÒıÓÃ
-    @param  b À¶É«·ÖÁ¿ÒıÓÃ
-    @return ÎŞ
+    @brief  ä»NVSåŠ è½½é¢œè‰²
+    @param  r çº¢è‰²åˆ†é‡å¼•ç”¨
+    @param  g ç»¿è‰²åˆ†é‡å¼•ç”¨
+    @param  b è“è‰²åˆ†é‡å¼•ç”¨
+    @return æ— 
 */
 void CNvs::loadColor(uint8_t &r, uint8_t &g, uint8_t &b)
 {
     PREFS.begin(NAME, true);
-    r = PREFS.getUChar("colorR", 255);
-    g = PREFS.getUChar("colorG", 255);
-    b = PREFS.getUChar("colorB", 255);
+    r = PREFS.getUChar("colorR", 255); // ä»NVSè·å–çº¢è‰²åˆ†é‡ï¼Œé»˜è®¤å€¼ä¸º255
+    g = PREFS.getUChar("colorG", 255); // ä»NVSè·å–ç»¿è‰²åˆ†é‡ï¼Œé»˜è®¤å€¼ä¸º255
+    b = PREFS.getUChar("colorB", 255); // ä»NVSè·å–è“è‰²åˆ†é‡ï¼Œé»˜è®¤å€¼ä¸º255
     PREFS.end();
 }
 
 /*
-    @brief  ±£´æWiFiÅäÍø×´Ì¬µ½NVS
-    @param  state ÅäÍø×´Ì¬
-    @return ÎŞ
+    @brief  ä¿å­˜WiFié…ç½‘çŠ¶æ€åˆ°NVS
+    @param  state é…ç½‘çŠ¶æ€
+    @return æ— 
 */
 void CNvs::saveWifiState(bool state)
 {
@@ -92,9 +92,9 @@ void CNvs::saveWifiState(bool state)
 }
 
 /*
-    @brief  ´ÓNVS»ñÈ¡WiFiÅäÍø×´Ì¬
-    @param  state ÅäÍø×´Ì¬
-    @return ÎŞ
+    @brief  ä»NVSè·å–WiFié…ç½‘çŠ¶æ€
+    @param  state é…ç½‘çŠ¶æ€
+    @return æ— 
 */
 void CNvs::getWifiState(bool &state)
 {
@@ -104,13 +104,13 @@ void CNvs::getWifiState(bool &state)
 }
 
 /*
-    @brief  ±£´æWiFiĞÅÏ¢µ½NVS
-    @param  ssid WiFiÃû³Æ
-    @param  password WiFiÃÜÂë
-    @param  hasPassword ÊÇ·ñÓĞÃÜÂë
-    @return ÎŞ
+    @brief  ä¿å­˜WiFiä¿¡æ¯åˆ°NVS
+    @param  ssid WiFiåç§°
+    @param  password WiFiå¯†ç 
+    @param  hasPassword æ˜¯å¦æœ‰å¯†ç 
+    @return æ— 
 */
-void CNvs::saveWifiInfo(const char* ssid, const char* password, bool hasPassword)
+void CNvs::saveWifiInfo(const char *ssid, const char *password, bool hasPassword)
 {
     PREFS.begin(NAME, false);
     PREFS.putString("wifiSSID", ssid);
@@ -120,13 +120,13 @@ void CNvs::saveWifiInfo(const char* ssid, const char* password, bool hasPassword
 }
 
 /*
-    @brief  ´ÓNVS¼ÓÔØWiFiĞÅÏ¢
-    @param  ssid WiFiÃû³Æ
-    @param  password WiFiÃÜÂë
-    @param  hasPassword ÊÇ·ñÓĞÃÜÂë
-    @return ÎŞ
+    @brief  ä»NVSåŠ è½½WiFiä¿¡æ¯
+    @param  ssid WiFiåç§°
+    @param  password WiFiå¯†ç 
+    @param  hasPassword æ˜¯å¦æœ‰å¯†ç 
+    @return æ— 
 */
-void CNvs::loadWifiInfo(char* ssid, char* password, bool &hasPassword)
+void CNvs::loadWifiInfo(char *ssid, char *password, bool &hasPassword)
 {
     PREFS.begin(NAME, true);
     String ssidStr = PREFS.getString("wifiSSID", "");
@@ -135,4 +135,4 @@ void CNvs::loadWifiInfo(char* ssid, char* password, bool &hasPassword)
     strncpy(ssid, ssidStr.c_str(), 40);
     strncpy(password, passwordStr.c_str(), 40);
     PREFS.end();
-}   
+}

@@ -1,134 +1,134 @@
 #include "ws2812b.h"
 #include "nvs.h"
 
-#define MAX_BRIGHTNESS 50 // ×î´óÁÁ¶È
+#define MAX_BRIGHTNESS 50 // æœ€å¤§äº®åº¦
 
-extern CNvs NVS; // Íâ²¿NVS¶ÔÏó
+extern CNvs NVS; // å¤–éƒ¨NVSå¯¹è±¡
 
 /*
-    @brief  ¹¹Ôìº¯Êı£¬³õÊ¼»¯Êı¾İÒı½ÅºÍµÆÖéÊıÁ¿
-    @param  pin  Êı¾İÒı½Å
-    @param  num  µÆÖéÊıÁ¿
-    @return ÎŞ
+    @brief  æ„é€ å‡½æ•°ï¼Œåˆå§‹åŒ–æ•°æ®å¼•è„šå’Œç¯ç æ•°é‡
+    @param  pin  æ•°æ®å¼•è„š
+    @param  num  ç¯ç æ•°é‡
+    @return æ— 
 */
 CWs2812b::CWs2812b(uint8_t pin, uint16_t num) : m_Pin(pin), m_Num(num), PIXEL(num, pin, NEO_GRB + NEO_KHZ800)
 {
     m_Brightness = MAX_BRIGHTNESS;
 
-    PIXEL.setBrightness(m_Brightness); // ÉèÖÃÄ¬ÈÏÁÁ¶È
-    colorRed = 255;                    // Ä¬ÈÏºìÉ«·ÖÁ¿
-    colorGreen = 255;                  // Ä¬ÈÏÂÌÉ«·ÖÁ¿
-    colorBlue = 255;                   // Ä¬ÈÏÀ¶É«·ÖÁ¿
+    PIXEL.setBrightness(m_Brightness); // è®¾ç½®é»˜è®¤äº®åº¦
+    colorRed = 255;                    // é»˜è®¤çº¢è‰²åˆ†é‡
+    colorGreen = 255;                  // é»˜è®¤ç»¿è‰²åˆ†é‡
+    colorBlue = 255;                   // é»˜è®¤è“è‰²åˆ†é‡
 }
 
 /*
-    @brief  Îö¹¹º¯Êı
-    @param  ÎŞ
-    @return ÎŞ
+    @brief  ææ„å‡½æ•°
+    @param  æ— 
+    @return æ— 
 */
 CWs2812b::~CWs2812b(void)
 {
 }
 
 /*
-    @brief  ³õÊ¼»¯µÆ°å
-    @param  row  µÆ°åĞĞÊı
-    @param  col  µÆ°åÁĞÊı
-    @param  config  µÆ°å²¼ÏßÀàĞÍ
-    @return ³É¹¦Óë·ñ
+    @brief  åˆå§‹åŒ–ç¯æ¿
+    @param  row  ç¯æ¿è¡Œæ•°
+    @param  col  ç¯æ¿åˆ—æ•°
+    @param  config  ç¯æ¿å¸ƒçº¿ç±»å‹
+    @return æˆåŠŸä¸å¦
 */
 bool CWs2812b::init(uint8_t row, uint8_t col, RgbConfig config)
 {
-    /* ¼ì²éĞĞÁĞÊıÓëµÆÖéÊıÁ¿ÊÇ·ñÆ¥Åä */
+    /* æ£€æŸ¥è¡Œåˆ—æ•°ä¸ç¯ç æ•°é‡æ˜¯å¦åŒ¹é… */
     if (row * col != m_Num)
     {
         return false;
     }
 
-    /* ±£´æµÆ°å²¼¾Ö */
+    /* ä¿å­˜ç¯æ¿å¸ƒå±€ */
     m_Row = row;
     m_Col = col;
     m_Config = config;
 
-    /* Éú³ÉÆ¥ÅäµÆÖéÊıÁ¿µÄÓ³Éä±í */
+    /* ç”ŸæˆåŒ¹é…ç¯ç æ•°é‡çš„æ˜ å°„è¡¨ */
     m_MapTable.resize(m_Num);
 
     switch (m_Config)
     {
-    case Snakelike: // ÉßĞÎ²¼Ïß
+    case Snakelike: // è›‡å½¢å¸ƒçº¿
         for (uint8_t r = 0; r < row; r++)
         {
             for (uint8_t c = 0; c < col; c++)
             {
-                uint8_t index = r * col + c; // µ±Ç°µÆÖéË÷Òı
+                uint8_t index = r * col + c; // å½“å‰ç¯ç ç´¢å¼•
                 if (r % 2 == 0)
                 {
-                    m_MapTable[index] = index; // µÆ°åÆæÊıĞĞ£¬Ë³Ğò
+                    m_MapTable[index] = index; // ç¯æ¿å¥‡æ•°è¡Œï¼Œé¡ºåº
                 }
                 else
                 {
-                    m_MapTable[index] = (r + 1) * col - c - 1; // µÆ°åÅ¼ÊıĞĞ£¬·´Ğò
+                    m_MapTable[index] = (r + 1) * col - c - 1; // ç¯æ¿å¶æ•°è¡Œï¼Œååº
                 }
             }
         }
         break;
-    case Parallel: // ²¢ĞĞ²¼Ïß
+    case Parallel: // å¹¶è¡Œå¸ƒçº¿
         for (uint16_t i = 0; i < m_Num; i++)
         {
-            m_MapTable[i] = i; // Ö±½ÓÓ³Éä
+            m_MapTable[i] = i; // ç›´æ¥æ˜ å°„
         }
         break;
     default:
-        return false; // ²»Ö§³ÖµÄ²¼ÏßÀàĞÍ
+        return false; // ä¸æ”¯æŒçš„å¸ƒçº¿ç±»å‹
     }
 
     return true;
 }
 
 /*
-    @brief  ÒÔÉÏÒ»´ÎÑÕÉ«¿ªÆôµÆ°å
-    @param  ÎŞ
-    @return ÎŞ
+    @brief  ä»¥ä¸Šä¸€æ¬¡é¢œè‰²å¼€å¯ç¯æ¿
+    @param  æ— 
+    @return æ— 
 */
 void CWs2812b::begin(void)
 {
-    NVS.loadColor(colorRed, colorGreen, colorBlue); // ´ÓNVS¼ÓÔØÑÕÉ«
-    PIXEL.fill(PIXEL.Color(colorRed, colorGreen, colorBlue)); // ÉèÖÃËùÓĞµÆÖéÑÕÉ«
+    NVS.loadColor(colorRed, colorGreen, colorBlue);           // ä»NVSåŠ è½½é¢œè‰²
+    PIXEL.fill(PIXEL.Color(colorRed, colorGreen, colorBlue)); // è®¾ç½®æ‰€æœ‰ç¯ç é¢œè‰²
     PIXEL.show();
 }
 
 /*
-    @brief  ²âÊÔº¯Êı£¬ÒÀ´ÎµãÁÁÃ¿¸öµÆÖé
-    @param  ÎŞ
-    @return ÎŞ
+    @brief  æµ‹è¯•å‡½æ•°ï¼Œä¾æ¬¡ç‚¹äº®æ¯ä¸ªç¯ç 
+    @param  æ— 
+    @return æ— 
 */
 void CWs2812b::test(void)
 {
     for (uint16_t i = 0; i < m_Num; i++)
     {
-        PIXEL.setPixelColor(m_MapTable[i], PIXEL.Color(255, 255, 255)); // µãÁÁ°×É«
+        PIXEL.setPixelColor(m_MapTable[i], PIXEL.Color(255, 255, 255)); // ç‚¹äº®ç™½è‰²
         PIXEL.show();
         delay(50);
     }
 }
 
 /*
-    @brief  ÉèÖÃËùÓĞµÆÖéÑÕÉ«
-    @param  r  ºìÉ«·ÖÁ¿
-    @param  g  ÂÌÉ«·ÖÁ¿
-    @param  b  À¶É«·ÖÁ¿
-    @return ³É¹¦Óë·ñ
+    @brief  è®¾ç½®æ‰€æœ‰ç¯ç é¢œè‰²
+    @param  r  çº¢è‰²åˆ†é‡
+    @param  g  ç»¿è‰²åˆ†é‡
+    @param  b  è“è‰²åˆ†é‡
+    @return æˆåŠŸä¸å¦
 */
 void CWs2812b::setAllPixelColor(uint8_t r, uint8_t g, uint8_t b)
 {
-    PIXEL.fill(PIXEL.Color(r, g, b)); // ÉèÖÃËùÓĞµÆÖéÑÕÉ«
+    PIXEL.fill(PIXEL.Color(r, g, b)); // è®¾ç½®æ‰€æœ‰ç¯ç é¢œè‰²
     PIXEL.show();
 }
 
 /*
-    @brief  ÉèÖÃËùÓĞµÆÖéÁÁ¶È
-    @param  brightness  ÁÁ¶ÈÖµ (0-MAX_BRIGHTNESS)
-    @return ÎŞ
+    @brief  è®¾ç½®æ‰€æœ‰ç¯ç äº®åº¦
+    @param  brightness  äº®åº¦å€¼ (0-MAX_BRIGHTNESS)
+    @return æ— 
 */
 void CWs2812b::setAllPixelBrightness(uint8_t brightness)
 {

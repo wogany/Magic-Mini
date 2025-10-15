@@ -3,38 +3,38 @@
 #include "nvs.h"
 #include "web.h"
 
-#define RGB_NUM 40            // µÆÖéÊıÁ¿
-#define RGB_ROW 5             // µÆ°åĞĞÊı
-#define RGB_COL 8             // µÆ°åÁĞÊı
-#define RGB_MAX_BRIGHTNESS 70 // ×î´óÁÁ¶È
+#define RGB_NUM 40            // ç¯ç æ•°é‡
+#define RGB_ROW 5             // ç¯æ¿è¡Œæ•°
+#define RGB_COL 8             // ç¯æ¿åˆ—æ•°
+#define RGB_MAX_BRIGHTNESS 70 // æœ€å¤§äº®åº¦
 
-#define RGB_PIN 10           // ĞÅºÅÊäÈëÒı½Å
-#define BUTTON_LEFT_PIN 18   // ×ó°´¼üÒı½Å
-#define BUTTON_MIDDLE_PIN 19 // ÖĞ°´¼üÒı½Å
-#define BUTTON_RIGHT_PIN 3   // ÓÒ°´¼üÒı½Å
+#define RGB_PIN 10           // ä¿¡å·è¾“å…¥å¼•è„š
+#define BUTTON_LEFT_PIN 18   // å·¦æŒ‰é”®å¼•è„š
+#define BUTTON_MIDDLE_PIN 19 // ä¸­æŒ‰é”®å¼•è„š
+#define BUTTON_RIGHT_PIN 3   // å³æŒ‰é”®å¼•è„š
 
-#define BUTTON_DEBOUNCE_DELAY 10 // °´¼üÏû¶¶ÑÓÊ±
-#define BUTTON_HOLD_DELAY 20     // °´¼ü³¤°´ÈÎÎñµ¥ÔªÊ±¼ä
+#define BUTTON_DEBOUNCE_DELAY 10 // æŒ‰é”®æ¶ˆæŠ–å»¶æ—¶
+#define BUTTON_HOLD_DELAY 20     // æŒ‰é”®é•¿æŒ‰ä»»åŠ¡å•å…ƒæ—¶é—´
 
-unsigned long lastTime = 0;                      // °´¼ü³¤°´ÈÎÎñÉÏ´Î´¥·¢Ê±¼ä
-volatile unsigned long leftButtonLastTime = 0;   // ×ó°´¼üÉÏ´Î´¥·¢Ê±¼ä
-volatile unsigned long middleButtonLastTime = 0; // ÖĞ°´¼üÉÏ´Î´¥·¢Ê±¼ä
-volatile unsigned long rightButtonLastTime = 0;  // ÓÒ°´¼üÉÏ´Î´¥·¢Ê±¼ä
+unsigned long lastTime = 0;                      // æŒ‰é”®é•¿æŒ‰ä»»åŠ¡ä¸Šæ¬¡è§¦å‘æ—¶é—´
+volatile unsigned long leftButtonLastTime = 0;   // å·¦æŒ‰é”®ä¸Šæ¬¡è§¦å‘æ—¶é—´
+volatile unsigned long middleButtonLastTime = 0; // ä¸­æŒ‰é”®ä¸Šæ¬¡è§¦å‘æ—¶é—´
+volatile unsigned long rightButtonLastTime = 0;  // å³æŒ‰é”®ä¸Šæ¬¡è§¦å‘æ—¶é—´
 
-volatile bool isButtonPressed = false;        // ÓĞ°´¼ü°´ÏÂ±êÖ¾
-volatile bool leftButtonPressed = false;      // ×ó°´¼ü°´ÏÂ±êÖ¾
-volatile bool middleButtonPressed = false;    // ÖĞ°´¼ü°´ÏÂ±êÖ¾
-volatile bool rightButtonPressed = false;     // ÓÒ°´¼ü°´ÏÂ±êÖ¾
-volatile bool middleButtonShortPress = false; // ÖĞ°´¼ü¶Ì°´ÈÎÎñ±êÖ¾
-volatile bool middleButtonRequest = false;    // ÖĞ°´¼ü¶Ì°´ÈÎÎñ½áÊø±êÖ¾
-bool isMiddleButtonHold = false;              // ÖĞ°´¼ü³¤°´ÈÎÎñ±êÖ¾
+volatile bool isButtonPressed = false;        // æœ‰æŒ‰é”®æŒ‰ä¸‹æ ‡å¿—
+volatile bool leftButtonPressed = false;      // å·¦æŒ‰é”®æŒ‰ä¸‹æ ‡å¿—
+volatile bool middleButtonPressed = false;    // ä¸­æŒ‰é”®æŒ‰ä¸‹æ ‡å¿—
+volatile bool rightButtonPressed = false;     // å³æŒ‰é”®æŒ‰ä¸‹æ ‡å¿—
+volatile bool middleButtonShortPress = false; // ä¸­æŒ‰é”®çŸ­æŒ‰ä»»åŠ¡æ ‡å¿—
+volatile bool middleButtonRequest = false;    // ä¸­æŒ‰é”®çŸ­æŒ‰ä»»åŠ¡ç»“æŸæ ‡å¿—
+bool isMiddleButtonHold = false;              // ä¸­æŒ‰é”®é•¿æŒ‰ä»»åŠ¡æ ‡å¿—
 
-uint8_t *colorChoose = nullptr; // ÑÕÉ«Ñ¡ÔñÖ¸Õë
-uint8_t middleButtonCount = 0;  // ÖĞ°´¼ü¼ÆÊı
+uint8_t *colorChoose = nullptr; // é¢œè‰²é€‰æ‹©æŒ‡é’ˆ
+uint8_t middleButtonCount = 0;  // ä¸­æŒ‰é”®è®¡æ•°
 
-CWs2812b RGB = CWs2812b(RGB_PIN, RGB_NUM); // µÆ°å¶ÔÏó
-CNvs NVS;                                  // NVS´æ´¢¶ÔÏó
-CWeb WEB;                                  // Web·şÎñÆ÷¶ÔÏó
+CWs2812b RGB = CWs2812b(RGB_PIN, RGB_NUM); // ç¯æ¿å¯¹è±¡
+CNvs NVS;                                  // NVSå­˜å‚¨å¯¹è±¡
+CWeb WEB;                                  // WebæœåŠ¡å™¨å¯¹è±¡
 
 void buttonSetup(void);
 void buttonLoop(void);
@@ -81,15 +81,15 @@ void loop()
 
         if (colorChoose == &RGB.colorRed)
         {
-            colorChoose = &RGB.colorGreen; // Ñ¡ÔñÂÌÉ«·ÖÁ¿
+            colorChoose = &RGB.colorGreen; // é€‰æ‹©ç»¿è‰²åˆ†é‡
         }
         else if (colorChoose == &RGB.colorGreen)
         {
-            colorChoose = &RGB.colorBlue; // Ñ¡ÔñÀ¶É«·ÖÁ¿
+            colorChoose = &RGB.colorBlue; // é€‰æ‹©è“è‰²åˆ†é‡
         }
         else if (colorChoose == &RGB.colorBlue)
         {
-            colorChoose = &RGB.colorRed; // Ñ¡ÔñºìÉ«·ÖÁ¿
+            colorChoose = &RGB.colorRed; // é€‰æ‹©çº¢è‰²åˆ†é‡
         }
 
         delay(100);
@@ -100,88 +100,88 @@ void loop()
 }
 
 /*
-    @brief  °´¼üÒı½Å³õÊ¼»¯,ÉÏÀ­ÊäÈë£¬ÏÂ½µÑØ´¥·¢ÖĞ¶Ï
-    @param  ÎŞ
-    @return ÎŞ
+    @brief  æŒ‰é”®å¼•è„šåˆå§‹åŒ–,ä¸Šæ‹‰è¾“å…¥ï¼Œä¸‹é™æ²¿è§¦å‘ä¸­æ–­
+    @param  æ— 
+    @return æ— 
 */
 void buttonSetup(void)
 {
-    pinMode(BUTTON_LEFT_PIN, INPUT_PULLUP);
-    pinMode(BUTTON_MIDDLE_PIN, INPUT_PULLUP);
-    pinMode(BUTTON_RIGHT_PIN, INPUT_PULLUP);
+    pinMode(BUTTON_LEFT_PIN, INPUT_PULLUP);   // è®¾ç½®å·¦æŒ‰é”®å¼•è„šä¸ºè¾“å…¥ä¸Šæ‹‰æ¨¡å¼
+    pinMode(BUTTON_MIDDLE_PIN, INPUT_PULLUP); // è®¾ç½®ä¸­æŒ‰é”®å¼•è„šä¸ºè¾“å…¥ä¸Šæ‹‰æ¨¡å¼
+    pinMode(BUTTON_RIGHT_PIN, INPUT_PULLUP);  // è®¾ç½®å³æŒ‰é”®å¼•è„šä¸ºè¾“å…¥ä¸Šæ‹‰æ¨¡å¼
 
-    attachInterrupt(BUTTON_LEFT_PIN, leftButtonISR, FALLING);
-    attachInterrupt(BUTTON_MIDDLE_PIN, middleButtonISR, FALLING);
-    attachInterrupt(BUTTON_RIGHT_PIN, rightButtonISR, FALLING);
+    attachInterrupt(BUTTON_LEFT_PIN, leftButtonISR, FALLING);     // ä¸ºå·¦æŒ‰é”®å¼•è„šé…ç½®ä¸­æ–­
+    attachInterrupt(BUTTON_MIDDLE_PIN, middleButtonISR, FALLING); // ä¸ºä¸­æŒ‰é”®å¼•è„šé…ç½®ä¸­æ–­
+    attachInterrupt(BUTTON_RIGHT_PIN, rightButtonISR, FALLING);   // ä¸ºå³æŒ‰é”®å¼•è„šé…ç½®ä¸­æ–­
 
     colorChoose = &RGB.colorRed;
 }
 
 /*
-    @brief  °´¼ü´¦Àíº¯Êı
-    @param  ÎŞ
-    @return ÎŞ
+    @brief  æŒ‰é”®å¤„ç†å‡½æ•°
+    @param  æ— 
+    @return æ— 
 */
 void buttonLoop(void)
 {
-    /* ÅĞ¶Ï±»°´ÏÂµÄ°´¼ü */
-    uint8_t buttonPin;
-    if (leftButtonPressed)
+    /* åˆ¤æ–­è¢«æŒ‰ä¸‹çš„æŒ‰é”® */
+    uint8_t buttonPin;     // å­˜å‚¨è¢«æŒ‰ä¸‹æŒ‰é”®çš„å¼•è„šå·
+    if (leftButtonPressed) // æ£€æµ‹å·¦æŒ‰é”®æ˜¯å¦è¢«æŒ‰ä¸‹
     {
-        buttonPin = BUTTON_LEFT_PIN;
+        buttonPin = BUTTON_LEFT_PIN; // è®¾ç½®ä¸ºå·¦æŒ‰é”®å¼•è„š
     }
-    else if (middleButtonPressed)
+    else if (middleButtonPressed) // æ£€æµ‹ä¸­æŒ‰é”®æ˜¯å¦è¢«æŒ‰ä¸‹
     {
-        buttonPin = BUTTON_MIDDLE_PIN;
+        buttonPin = BUTTON_MIDDLE_PIN; // è®¾ç½®ä¸ºä¸­æŒ‰é”®å¼•è„š
     }
-    else if (rightButtonPressed)
+    else if (rightButtonPressed) // æ£€æµ‹å³æŒ‰é”®æ˜¯å¦è¢«æŒ‰ä¸‹
     {
-        buttonPin = BUTTON_RIGHT_PIN;
+        buttonPin = BUTTON_RIGHT_PIN; // è®¾ç½®ä¸ºå³æŒ‰é”®å¼•è„š
     }
 
-    /* ÅĞ¶Ï±»°´ÏÂ°´¼üµÄ×´Ì¬ */
-    bool buttonState = false;
-    buttonState = digitalRead(buttonPin);
+    /* åˆ¤æ–­è¢«æŒ‰ä¸‹æŒ‰é”®çš„çŠ¶æ€ */
+    bool buttonState = false;             // å­˜å‚¨æŒ‰é”®çŠ¶æ€ï¼Œfalseè¡¨ç¤ºæŒ‰ä¸‹ï¼Œtrueè¡¨ç¤ºé‡Šæ”¾
+    buttonState = digitalRead(buttonPin); // è¯»å–æŒ‰é”®å¼•è„šçš„å½“å‰çŠ¶æ€
 
-    /* µ±°´¼ü³¤°´Ê±Ö´ĞĞ */
-    while (buttonState == false)
+    /* å½“æŒ‰é”®é•¿æŒ‰æ—¶æ‰§è¡Œ */
+    while (buttonState == false) // å½“æŒ‰é”®ä¿æŒæŒ‰ä¸‹çŠ¶æ€æ—¶å¾ªç¯æ‰§è¡Œ
     {
-        unsigned long now = millis();
+        unsigned long now = millis(); // è·å–å½“å‰ç³»ç»Ÿè¿è¡Œæ—¶é—´ï¼ˆæ¯«ç§’ï¼‰
 
-        /* Ã¿¾­¹ıÒ»´Î³¤°´ÈÎÎñµ¥ÔªÊ±¼äÖ´ĞĞ*/
-        if (now - lastTime > BUTTON_HOLD_DELAY)
+        /* æ¯ç»è¿‡ä¸€æ¬¡é•¿æŒ‰ä»»åŠ¡å•å…ƒæ—¶é—´æ‰§è¡Œ*/
+        if (now - lastTime > BUTTON_HOLD_DELAY) // åˆ¤æ–­æ˜¯å¦è¾¾åˆ°é•¿æŒ‰ä»»åŠ¡æ‰§è¡Œé—´éš”
         {
-            lastTime = now;
-            if (leftButtonPressed)
+            lastTime = now;        // æ›´æ–°ä¸Šæ¬¡æ‰§è¡Œæ—¶é—´
+            if (leftButtonPressed) // å¦‚æœæ˜¯å·¦æŒ‰é”®é•¿æŒ‰
             {
-                leftButtonHandle();
+                leftButtonHandle(); // è°ƒç”¨å·¦æŒ‰é”®å¤„ç†å‡½æ•°ï¼Œå‡å°‘å½“å‰é¢œè‰²åˆ†é‡å€¼
             }
-            else if (middleButtonPressed)
+            else if (middleButtonPressed) // å¦‚æœæ˜¯ä¸­æŒ‰é”®é•¿æŒ‰
             {
-                middleButtonHandle();
-                if (isMiddleButtonHold == false)
+                middleButtonHandle();            // è°ƒç”¨ä¸­æŒ‰é”®å¤„ç†å‡½æ•°ï¼Œå¤„ç†é•¿æŒ‰é€»è¾‘
+                if (isMiddleButtonHold == false) // æ£€æŸ¥æ˜¯å¦éœ€è¦é€€å‡ºé•¿æŒ‰å¤„ç†
                 {
-                    break; // ÍË³ö³¤°´´¦ÀíÑ­»·
+                    break; // é€€å‡ºé•¿æŒ‰å¤„ç†å¾ªç¯
                 }
             }
-            else if (rightButtonPressed)
+            else if (rightButtonPressed) // å¦‚æœæ˜¯å³æŒ‰é”®é•¿æŒ‰
             {
-                rightButtonHandle();
+                rightButtonHandle(); // è°ƒç”¨å³æŒ‰é”®å¤„ç†å‡½æ•°ï¼Œå¢åŠ å½“å‰é¢œè‰²åˆ†é‡å€¼
             }
-            RGB.setAllPixelColor(RGB.colorRed, RGB.colorGreen, RGB.colorBlue);
+            RGB.setAllPixelColor(RGB.colorRed, RGB.colorGreen, RGB.colorBlue); // æ›´æ–°æ‰€æœ‰ç¯ç çš„é¢œè‰²æ˜¾ç¤º
         }
 
-        buttonState = digitalRead(buttonPin); // ¶ÁÈ¡°´¼ü×´Ì¬
+        buttonState = digitalRead(buttonPin); // é‡æ–°è¯»å–æŒ‰é”®çŠ¶æ€ï¼Œæ£€æŸ¥æ˜¯å¦é‡Šæ”¾
     }
 
-    /* °´¼üÊÍ·ÅºóÖ´ĞĞ */
-    NVS.saveColor(RGB.colorRed, RGB.colorGreen, RGB.colorBlue);
+    /* æŒ‰é”®é‡Šæ”¾åæ‰§è¡Œ */
+    NVS.saveColor(RGB.colorRed, RGB.colorGreen, RGB.colorBlue); // å°†å½“å‰RGBé¢œè‰²å€¼ä¿å­˜åˆ°NVSéæ˜“å¤±æ€§å­˜å‚¨å™¨
 }
 
 /*
-    @brief  ×ó°´¼ü´¦Àíº¯Êı
-    @param  ÎŞ
-    @return ÎŞ
+    @brief  å·¦æŒ‰é”®å¤„ç†å‡½æ•°
+    @param  æ— 
+    @return æ— 
 */
 void leftButtonHandle(void)
 {
@@ -192,9 +192,9 @@ void leftButtonHandle(void)
 }
 
 /*
-    @brief  ÖĞ°´¼ü´¦Àíº¯Êı
-    @param  ÎŞ
-    @return ÎŞ
+    @brief  ä¸­æŒ‰é”®å¤„ç†å‡½æ•°
+    @param  æ— 
+    @return æ— 
 */
 void middleButtonHandle(void)
 {
@@ -204,7 +204,7 @@ void middleButtonHandle(void)
         middleButtonCount = 0;
         isMiddleButtonHold = false;
 
-        /* ½øÈëÅäÍøÄ£Ê½ */
+        /* è¿›å…¥é…ç½‘æ¨¡å¼ */
         RGB.setAllPixelColor(0, 0, 0);
         NVS.saveWifiState(false);
         delay(1000);
@@ -213,9 +213,9 @@ void middleButtonHandle(void)
 }
 
 /*
-    @brief  ÓÒ°´¼ü´¦Àíº¯Êı
-    @param  ÎŞ
-    @return ÎŞ
+    @brief  å³æŒ‰é”®å¤„ç†å‡½æ•°
+    @param  æ— 
+    @return æ— 
 */
 void rightButtonHandle(void)
 {
@@ -226,9 +226,9 @@ void rightButtonHandle(void)
 }
 
 /*
-    @brief  ×ó°´¼üÖĞ¶Ï·şÎñº¯Êı
-    @param  ÎŞ
-    @return ÎŞ
+    @brief  å·¦æŒ‰é”®ä¸­æ–­æœåŠ¡å‡½æ•°
+    @param  æ— 
+    @return æ— 
 */
 void IRAM_ATTR leftButtonISR(void)
 {
@@ -246,32 +246,33 @@ void IRAM_ATTR leftButtonISR(void)
 }
 
 /*
-    @brief  ÖĞ°´¼üÖĞ¶Ï·şÎñº¯Êı
-    @param  ÎŞ
-    @return ÎŞ
+    @brief  ä¸­æŒ‰é”®ä¸­æ–­æœåŠ¡å‡½æ•°
+    @param  æ— 
+    @return æ— 
 */
 void IRAM_ATTR middleButtonISR(void)
 {
-    unsigned long now = millis();
-    if (now - middleButtonLastTime > BUTTON_DEBOUNCE_DELAY)
+    unsigned long now = millis();                           // è·å–å½“å‰ç³»ç»Ÿè¿è¡Œæ—¶é—´ï¼ˆæ¯«ç§’ï¼‰
+    if (now - middleButtonLastTime > BUTTON_DEBOUNCE_DELAY) // åˆ¤æ–­æ˜¯å¦è¶…è¿‡æŒ‰é”®æ¶ˆæŠ–å»¶æ—¶
     {
-        middleButtonLastTime = now;
+        middleButtonLastTime = now; // æ›´æ–°ä¸­æŒ‰é”®ä¸Šæ¬¡è§¦å‘æ—¶é—´
 
+        // æ£€æŸ¥æ˜¯å¦æœ‰å…¶ä»–æŒ‰é”®æ­£åœ¨å¤„ç†ï¼Œå¹¶ç¡®è®¤ä¸­æŒ‰é”®ç¡®å®è¢«æŒ‰ä¸‹ï¼ˆä½ç”µå¹³ï¼‰
         if (!isButtonPressed && digitalRead(BUTTON_MIDDLE_PIN) == LOW)
         {
-            isButtonPressed = true;
-            middleButtonPressed = true;
-            isMiddleButtonHold = true;
+            isButtonPressed = true;     // è®¾ç½®æœ‰æŒ‰é”®æŒ‰ä¸‹æ ‡å¿—ï¼Œé˜²æ­¢å¤šæŒ‰é”®åŒæ—¶å¤„ç†
+            middleButtonPressed = true; // è®¾ç½®ä¸­æŒ‰é”®æŒ‰ä¸‹æ ‡å¿—
+            isMiddleButtonHold = true;  // è®¾ç½®ä¸­æŒ‰é”®é•¿æŒ‰æ ‡å¿—ï¼Œå‡†å¤‡å¤„ç†é•¿æŒ‰äº‹ä»¶
         }
 
-        middleButtonShortPress = true; // ÉèÖÃ¶Ì°´ÈÎÎñ±êÖ¾
+        middleButtonShortPress = true; // è®¾ç½®ä¸­æŒ‰é”®çŸ­æŒ‰ä»»åŠ¡æ ‡å¿—ï¼Œè§¦å‘çŸ­æŒ‰å¤„ç†
     }
 }
 
 /*
-    @brief  ÓÒ°´¼üÖĞ¶Ï·şÎñº¯Êı
-    @param  ÎŞ
-    @return ÎŞ
+    @brief  å³æŒ‰é”®ä¸­æ–­æœåŠ¡å‡½æ•°
+    @param  æ— 
+    @return æ— 
 */
 void IRAM_ATTR rightButtonISR(void)
 {
